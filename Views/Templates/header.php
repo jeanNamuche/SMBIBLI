@@ -28,6 +28,9 @@
 </head>
 
 <body class="app sidebar-mini">
+    <?php if (session_status() == PHP_SESSION_NONE) {
+        session_start();
+    } ?>
     <?php
     // Verificar si el usuario tiene solo el permiso Alumno
     $esAlumno = false;
@@ -40,7 +43,7 @@
     ?>
     <?php if ($esAlumno) { ?>
         <!-- Solo mostrar el header básico y el catálogo -->
-        <header class="app-header"><a class="app-header__logo" href="<?php echo base_url; ?>Catalogo">Vida Informático</a>
+        <header class="app-header"><a class="app-header__logo" href="<?php echo base_url; ?>Catalogo">SAN MARTIN</a>
             <ul class="app-nav">
                 <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown" aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"></i></a>
                     <ul class="dropdown-menu settings-menu dropdown-menu-right">
@@ -50,11 +53,21 @@
                 </li>
             </ul>
         </header>
+        <!-- Sidebar reducido para alumno: mostrar avatar y nombre, sin menú -->
+        <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
+        <aside class="app-sidebar">
+            <div class="app-sidebar__user"><img class="app-sidebar__user-avatar" src="<?php echo base_url; ?>Assets/img/logo.png" alt="User Image" width="50">
+                <div>
+                    <p class="app-sidebar__user-name"><?php echo isset($_SESSION['nombre']) ? $_SESSION['nombre'] : ''; ?></p>
+                    <p class="app-sidebar__user-designation"><?php echo isset($_SESSION['usuario']) ? $_SESSION['usuario'] : ''; ?></p>
+                </div>
+            </div>
+        </aside>
         <main class="app-content">
     <?php } else { ?>
         <!-- Menú completo para administradores y otros roles -->
         <!-- Navbar-->
-        <header class="app-header"><a class="app-header__logo" href="<?php echo base_url; ?>Configuracion/admin">Vida Informático</a>
+        <header class="app-header"><a class="app-header__logo" href="<?php echo base_url; ?>Configuracion/admin">SAN MARTIN</a>
             <!-- Sidebar toggle button--><a class="app-sidebar__toggle" href="#" data-toggle="sidebar" aria-label="Hide Sidebar"></a>
             <!-- Navbar Right Menu-->
             <ul class="app-nav">
@@ -83,8 +96,8 @@
         <aside class="app-sidebar">
             <div class="app-sidebar__user"><img class="app-sidebar__user-avatar" src="<?php echo base_url; ?>Assets/img/logo.png" alt="User Image" width="50">
                 <div>
-                    <p class="app-sidebar__user-name"><?php echo $_SESSION['nombre'] ?></p>
-                    <p class="app-sidebar__user-designation"><?php echo $_SESSION['usuario']; ?></p>
+                    <p class="app-sidebar__user-name"><?php echo isset($_SESSION['nombre']) ? $_SESSION['nombre'] : ''; ?></p>
+                    <p class="app-sidebar__user-designation"><?php echo isset($_SESSION['usuario']) ? $_SESSION['usuario'] : ''; ?></p>
                 </div>
             </div>
             <ul class="app-menu">

@@ -64,7 +64,7 @@ class Autor extends Controller
             } else if (!empty($_POST['foto_actual']) && empty($name)) {
                 $imgNombre = $_POST['foto_actual'];
             } else {
-                $imgNombre = "logo.png";
+                $imgNombre = "logoS.png";
             }
             if ($id == "") {
                 $data = $this->model->insertarAutor($autor, $imgNombre);
@@ -81,7 +81,7 @@ class Autor extends Controller
             } else {
 
                 $imgDelete = $this->model->editAutor($id);
-                if ($imgDelete['imagen'] != 'logo.png') {
+                if ($imgDelete['imagen'] != 'logoS.png') {
                     if (file_exists("Assets/img/autor/" . $imgDelete['imagen'])) {
                         unlink("Assets/img/autor/" . $imgDelete['imagen']);
                     }
