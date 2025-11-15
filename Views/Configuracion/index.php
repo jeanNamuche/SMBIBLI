@@ -1,7 +1,7 @@
 <?php include "Views/Templates/header.php"; ?>
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-dashboard"></i> Datos de la Empresa</h1>
+        <h1></i>Datos de la I.E. SAN MARTÍN</h1>
     </div>
 </div>
 <div class="row">

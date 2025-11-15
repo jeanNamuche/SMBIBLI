@@ -16,7 +16,7 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
-        background: #eaeaea;
+        background: #1499f7;
         font-family: "Segoe UI", sans-serif;
     }
 
@@ -42,10 +42,14 @@
     }
 
     .spline-bg iframe {
-        width: 100%;
-        height: 100%;
+        width: 130%;
+        height: 130%;
         border: none;
         pointer-events: none; /* evita que el usuario mueva el fondo */
+        position: absolute;
+        top: -10%;
+        left: -10%;
+        object-fit: cover;
     }
 
     /* LOGIN (capa superior) */
@@ -54,10 +58,12 @@
         z-index: 2;
         background: rgba(255, 255, 255, 0.12); /* más transparente */
         backdrop-filter: blur(3px); /* menos desenfoque */
-        padding: 40px 50px;
+        padding: 10px;
         border-radius: 20px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 40px #1499f7;
         transition: all 0.3s ease;
+        
+    
     }
 
     /* EFECTO AL PASAR EL MOUSE */
@@ -66,21 +72,33 @@
         backdrop-filter: blur(2px);
     }
 
+
     .logo h1 {
         text-align: center;
-        color: #fff;
+        color: #1499f7;
+        font-family: 'arial black', sans-serif;
         font-weight: 300;
-        margin-bottom: 20px;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        font-size: 40px !important;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px #fff;
+    }
+
+    .logo-img {
+        display: block;
+        margin: 0 auto 20px;
+        max-width: 80px;
+        height: auto;
+        
     }
 
     .login-box {
         width: 320px;
+        padding-bottom: 10px !important;
     }
 
     .login-head {
         text-align: center;
-        color: #000;
+        color: #1499f7;
     }
 
     .control-label {
@@ -92,24 +110,26 @@
         background: rgba(255, 255, 255, 0.8);
         border: none;
         border-radius: 6px;
-        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 4px #1499f7;
     }
 
     .form-control:focus {
         background: rgba(255, 255, 255, 1);
         outline: none;
-        box-shadow: 0 0 5px rgba(0, 150, 136, 0.5);
+        box-shadow: 0 0 5px #1499f7;
     }
 
     .btn-primary {
-        background-color: #009688;
+        background-color: #1499f7;
         border: none;
         border-radius: 6px;
     }
 
     .btn-primary:hover {
-        background-color: #00796b;
+        background-color: #1499f7;
     }
+
+ 
     </style>
 </head>
 
@@ -124,8 +144,11 @@
         
         <div class="cover"></div>
     </section>
+
+
     <section class="login-content">
         <div class="logo">
+            <img src="<?php echo base_url; ?>Assets/img/logo.png" alt="Logo" class="logo-img">
             <h1>Bienvenidos</h1>
         </div>
         <div class="login-box">

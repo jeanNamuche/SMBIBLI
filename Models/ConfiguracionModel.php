@@ -37,7 +37,12 @@ class ConfiguracionModel extends Query{
     }
     public function getReportes()
     {
-        $sql = "SELECT titulo, cantidad FROM libro WHERE estado = 1";
+        $sql = "SELECT l.titulo, SUM(p.cantidad) AS cantidad 
+        FROM prestamo p 
+        INNER JOIN libro l ON p.id_libro = l.id 
+        GROUP BY l.titulo 
+        ORDER BY cantidad 
+        DESC LIMIT 5";
         $res = $this->selectAll($sql);
         return $res;
     }

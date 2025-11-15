@@ -31,7 +31,12 @@ class LibrosModel extends Query
     }
     public function editLibros($id)
     {
-        $sql = "SELECT * FROM libro WHERE id = $id";
+        // Obtener libro junto con nombres de autor, editorial y materia
+    $sql = "SELECT l.*, m.materia, a.autor, e.editorial FROM libro l
+        INNER JOIN materia m ON l.id_materia = m.id
+        INNER JOIN autor a ON l.id_autor = a.id
+        INNER JOIN editorial e ON l.id_editorial = e.id
+        WHERE l.id = $id";
         $res = $this->select($sql);
         return $res;
     }
@@ -69,5 +74,23 @@ class LibrosModel extends Query
             $tiene = true;
         }
         return $tiene;
+    }
+    //f
+    public function getAutores()
+    {
+        $sql = "SELECT id, autor FROM autor ORDER BY autor ASC";
+        return $this->selectAll($sql);
+    }
+
+    public function getEditoriales()
+    {
+        $sql = "SELECT id, editorial FROM editorial ORDER BY editorial ASC";
+        return $this->selectAll($sql);
+    }
+
+    public function getMaterias()
+    {
+        $sql = "SELECT id, materia FROM materia ORDER BY materia ASC";
+        return $this->selectAll($sql);
     }
 }

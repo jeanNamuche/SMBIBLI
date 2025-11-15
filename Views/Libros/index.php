@@ -1,7 +1,7 @@
 <?php include "Views/Templates/header.php"; ?>
 <div class="app-title">
     <div>
-        <h1><i class="fa fa-dashboard"></i> Libros</h1>
+        <h1></i>Libros</h1>
     </div>
 </div>
 <button class="btn btn-primary mb-2" onclick="frmLibros()"><i class="fa fa-plus"></i></button>
@@ -62,24 +62,33 @@
                         <div class="form-group">
                             <label for="autor">Autor</label><br>
                             <select id="autor" class="form-control autor" name="autor" required style="width: 100%;">
-                                
-                            </select>
+    <option value="">Seleccionar Autor</option>
+    <?php foreach ($data['autores'] as $row) { ?>
+        <option value="<?php echo $row['id']; ?>"><?php echo $row['autor']; ?></option>
+    <?php } ?>
+</select>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                             <label for="editorial">Editorial</label><br>
                             <select id="editorial" class="form-control editorial" name="editorial" required style="width: 100%;">
-                                
-                            </select>
+    <option value="">Seleccionar Editorial</option>
+    <?php foreach ($data['editoriales'] as $row) { ?>
+        <option value="<?php echo $row['id']; ?>"><?php echo $row['editorial']; ?></option>
+    <?php } ?>
+</select>
                         </div>
                     </div>
                     <div class="col-md-5">
                         <div class="form-group">
                             <label for="materia">Materia</label><br>
                             <select id="materia" class="form-control materia" name="materia" required style="width: 100%;">
-                                
-                            </select>
+    <option value="">Seleccionar Materia</option>
+    <?php foreach ($data['materias'] as $row) { ?>
+        <option value="<?php echo $row['id']; ?>"><?php echo $row['materia']; ?></option>
+    <?php } ?>
+</select>
                         </div>
                     </div>
                     <div class="col-md-3">

@@ -221,52 +221,36 @@ document.addEventListener("DOMContentLoaded", function(){
             buttons
     });
     //fin Libros
-    tblPrestar = $('#tblPrestar').DataTable({
-        ajax: {
-            url: base_url + "Prestamos/listar",
-            dataSrc: ''
-        },
-        columns: [{
-                'data': 'id'
-            },
-            {
-                'data': 'titulo'
-            },
-            {
-                'data': 'nombre'
-            },
-            {
-                'data': 'fecha_prestamo'
-            },
 
-            {
-                'data': 'fecha_devolucion'
-            },
-            {
-                'data': 'cantidad'
-            },
-            {
-                'data': 'observacion'
-            },
-            {
-                'data': 'estado'
-            },
-            {
-                'data': 'acciones'
-            }
-        ],
-        language,
-        dom: "<'row'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>>" +
-            "<'row'<'col-sm-12'tr>>" +
-            "<'row'<'col-sm-5'i><'col-sm-7'p>>",
-        buttons,
-        "resonsieve": true,
-        "bDestroy": true,
-        "iDisplayLength": 10,
-        "order": [
-            [0, "desc"]
-        ]
-    });
+  tblPrestar = $('#tblPrestar').DataTable({
+    ajax: {
+        url: base_url + "Prestamos/listar",
+        dataSrc: ''
+    },
+    columns: [
+        { 'data': 'id_p' }, // <-- ¡ESTA ES LA CORRECCIÓN!
+        { 'data': 'titulo' },
+        { 'data': 'nombre' },
+        { 'data': 'fecha_prestamo' },
+        { 'data': 'fecha_devolucion' },
+        { 'data': 'cantidad' },
+        { 'data': 'observacion' },
+        { 'data': 'estado' },
+        { 'data': 'acciones' }
+    ],
+    language,
+    dom: "<'row'<'col-sm-4'l><'col-sm-4 text-center'B><'col-sm-4'f>>" +
+        "<'row'<'col-sm-12'tr>>" +
+        "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+    buttons,
+    "resonsieve": true,
+    "bDestroy": true,
+    "iDisplayLength": 10,
+    "order": [
+        [0, "desc"]
+    ]
+});
+
     $('.estudiante').select2({
         placeholder: 'Buscar Estudiante',
         minimumInputLength: 2,
@@ -309,7 +293,8 @@ document.addEventListener("DOMContentLoaded", function(){
     });
     $('.autor').select2({
         placeholder: 'Buscar Autor',
-        minimumInputLength: 2,
+        allowClear: true,
+        minimumInputLength: 1,
         ajax: {
             url: base_url + 'Autor/buscarAutor',
             dataType: 'json',
@@ -927,6 +912,7 @@ function btnReingresarEdi(id) {
     })
 }
 //Fin editorial
+/*
 function frmLibros() {
     document.getElementById("title").textContent = "Nuevo Libro";
     document.getElementById("btnAccion").textContent = "Registrar";
@@ -934,7 +920,37 @@ function frmLibros() {
     document.getElementById("id").value = "";
     $("#nuevoLibro").modal("show");
     deleteImg();
+}*/
+function frmLibros() {
+    document.getElementById("title").textContent = "Nuevo Libro";
+    document.getElementById("btnAccion").textContent = "Registrar";
+    
+    document.getElementById("frmLibro").reset();
+    document.getElementById("id").value = "";
+
+    $('#autor').val(null).trigger('change');
+    $('#editorial').val(null).trigger('change');
+    $('#materia').val(null).trigger('change');
+
+    $("#nuevoLibro").modal("show");
+    
+    deleteImg();
 }
+
+$(document).ready(function() {
+    // Esto "activa" Select2 en tus 3 campos
+    // 'dropdownParent' es clave para que funcione dentro del modal
+    
+    $('#autor').select2({
+        dropdownParent: $('#nuevoLibro') 
+    });
+    $('#editorial').select2({
+        dropdownParent: $('#nuevoLibro')
+    });
+    $('#materia').select2({
+        dropdownParent: $('#nuevoLibro')
+    });
+});
 
 function registrarLibro(e) {
     e.preventDefault();
@@ -978,9 +994,56 @@ function btnEditarLibro(id) {
             const res = JSON.parse(this.responseText);
               document.getElementById("id").value = res.id;
               document.getElementById("titulo").value = res.titulo;
-              document.getElementById("autor").value = res.id_autor;
-              document.getElementById("editorial").value = res.id_editorial;
-              document.getElementById("materia").value = res.id_materia;
+              // Prefill selects (works with Select2). If the option doesn't exist, add it.
+              // Autor
+              try {
+                  const $autor = $('#autor');
+                  if ($autor.length) {
+                      if ($autor.find("option[value='" + res.id_autor + "']").length === 0) {
+                          // add and select
+                          const option = new Option(res.autor || 'Sin autor', res.id_autor, true, true);
+                          $autor.append(option).trigger('change');
+                      } else {
+                          $autor.val(res.id_autor).trigger('change');
+                      }
+                  } else {
+                      document.getElementById("autor").value = res.id_autor;
+                  }
+              } catch (e) {
+                  document.getElementById("autor").value = res.id_autor;
+              }
+              // Editorial
+              try {
+                  const $editorial = $('#editorial');
+                  if ($editorial.length) {
+                      if ($editorial.find("option[value='" + res.id_editorial + "']").length === 0) {
+                          const option = new Option(res.editorial || 'Sin editorial', res.id_editorial, true, true);
+                          $editorial.append(option).trigger('change');
+                      } else {
+                          $editorial.val(res.id_editorial).trigger('change');
+                      }
+                  } else {
+                      document.getElementById("editorial").value = res.id_editorial;
+                  }
+              } catch (e) {
+                  document.getElementById("editorial").value = res.id_editorial;
+              }
+              // Materia
+              try {
+                  const $materia = $('#materia');
+                  if ($materia.length) {
+                      if ($materia.find("option[value='" + res.id_materia + "']").length === 0) {
+                          const option = new Option(res.materia || 'Sin materia', res.id_materia, true, true);
+                          $materia.append(option).trigger('change');
+                      } else {
+                          $materia.val(res.id_materia).trigger('change');
+                      }
+                  } else {
+                      document.getElementById("materia").value = res.id_materia;
+                  }
+              } catch (e) {
+                  document.getElementById("materia").value = res.id_materia;
+              }
               document.getElementById("cantidad").value = res.cantidad;
               document.getElementById("num_pagina").value = res.num_pagina;
               document.getElementById("anio_edicion").value = res.anio_edicion;
@@ -1241,7 +1304,7 @@ if (document.getElementById("reportePrestamo")) {
                         datasets: [{
                             label: 'Libros',
                             data: cantidad,
-                            backgroundColor: ['#dc143c'],
+                            backgroundColor: ['#1499f7'],
                         }],
                     },
                 });

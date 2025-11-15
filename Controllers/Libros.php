@@ -15,10 +15,23 @@ class Libros extends Controller
             exit;
         }
     }
+    /*
     public function index()
     {
         $this->views->getView($this, "index");
+    }*/
+//f
+    public function index()
+    {
+        // 1. Obtenemos los datos para llenar los combos
+        $data['autores'] = $this->model->getAutores();
+        $data['editoriales'] = $this->model->getEditoriales();
+        $data['materias'] = $this->model->getMaterias();
+
+        // 2. Pasamos los datos a la vista
+        $this->views->getView($this, "index", $data);
     }
+
     public function listar()
     {
         $data = $this->model->getLibros();

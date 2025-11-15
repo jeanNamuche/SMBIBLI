@@ -19,6 +19,7 @@ class Prestamos extends Controller
     {
         $this->views->getView($this, "index");
     }
+    /*
     public function listar()
     {
         $data = $this->model->getPrestamos();
@@ -38,7 +39,38 @@ class Prestamos extends Controller
         }
         echo json_encode($data, JSON_UNESCAPED_UNICODE);
         die();
+    }*/
+
+    public function listar()
+    {
+        $data = $this->model->getPrestamos();
+        for ($i = 0; $i < count($data); $i++) {
+            if ($data[$i]['estado'] == 1) {
+                $data[$i]['estado'] = '<span class="badge badge-secondary">Prestado</span>';
+                
+                // --- CORREGIDO ---
+                $data[$i]['acciones'] = '<div>
+                <button class="btn btn-primary" type="button" onclick="btnEntregar(' . $data[$i]['id_p'] . ');"><i class="fa fa-hourglass-start"></i></button>
+                <a class="btn btn-danger" target="_blank" href="'.base_url.'Prestamos/ticked/'. $data[$i]['id_p'] . '"><i class="fa fa-file-pdf-o"></i></a>
+                <div/>';
+                // --- FIN CORRECCIÓN ---
+
+            } else {
+                $data[$i]['estado'] = '<span class="badge badge-primary">Devuelto</span>';
+                
+                // --- CORREGIDO ---
+                $data[$i]['acciones'] = '<div>
+                <a class="btn btn-danger" target="_blank" href="'.base_url.'Prestamos/ticked/'. $data[$i]['id_p'] . '"><i class="fa fa-file-pdf-o"></i></a>
+                <div/>';
+                // --- FIN CORRECCIÓN ---
+            }
+        }
+        echo json_encode($data, JSON_UNESCAPED_UNICODE);
+        die();
     }
+
+
+/*
     public function registrar()
     {
         $libro = strClean($_POST['libro']);
@@ -66,7 +98,46 @@ class Prestamos extends Controller
         }
         echo json_encode($msg, JSON_UNESCAPED_UNICODE);
         die();
+    }*/
+
+
+
+    public function registrar()
+{
+    $libro = strClean($_POST['libro']);
+    $estudiante = strClean($_POST['estudiante']);
+    $cantidad = strClean($_POST['cantidad']);
+    $fecha_prestamo = strClean($_POST['fecha_prestamo']);
+    $fecha_devolucion = strClean($_POST['fecha_devolucion']);
+    $observacion = strClean($_POST['observacion']);
+    
+    if (empty($libro) || empty($estudiante) || empty($cantidad) || empty($fecha_prestamo) || empty($fecha_devolucion)) {
+        $msg = array('msg' => 'Todo los campos son requeridos', 'icono' => 'warning');
+    } else {
+        // 1. Verificamos el stock disponible (esto está perfecto)
+        $verificar_cant = $this->model->getCantLibro($libro);
+        
+        if ($verificar_cant['cantidad'] >= $cantidad) {
+            
+            // 2. Intentamos insertar el préstamo
+            $data = $this->model->insertarPrestamo($estudiante, $libro, $cantidad, $fecha_prestamo, $fecha_devolucion, $observacion);
+
+            // 3. Lógica limpia: solo hay éxito (> 0) o error (0)
+            if ($data > 0) {
+                $msg = array('msg' => 'Libro Prestado', 'icono' => 'success', 'id' => $data);
+            } else {
+                $msg = array('msg' => 'Error al registrar el préstamo', 'icono' => 'error');
+            }
+
+        } else {
+            $msg = array('msg' => 'Stock no disponible', 'icono' => 'warning');
+        }
     }
+    echo json_encode($msg, JSON_UNESCAPED_UNICODE);
+    die();
+}
+
+
     public function entregar($id)
     {
         $datos = $this->model->actualizarPrestamo(0, $id);
