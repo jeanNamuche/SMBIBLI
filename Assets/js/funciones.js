@@ -83,13 +83,16 @@ document.addEventListener("DOMContentLoaded", function(){
             url: base_url + "Estudiantes/listar",
             dataSrc: ''
         },
-        columns: [{'data': 'id'},
+        // Updated columns to match new estudiante schema
+        columns: [
+            {'data': 'id'},
             {'data': 'codigo'},
             {'data': 'dni'},
+            {'data': 'grado'},
+            {'data': 'seccion'},
+            {'data': 'apellido_paterno'},
+            {'data': 'apellido_materno'},
             {'data': 'nombre'},
-            {'data':'carrera'},
-            {'data': 'direccion'},
-            {'data': 'telefono'},
             {'data': 'estado'},
             {'data': 'acciones'}
         ],
@@ -495,13 +498,14 @@ function registrarEstudiante(e) {
     e.preventDefault();
     const codigo = document.getElementById("codigo");
     const dni = document.getElementById("dni");
-    const nombre = document.getElementById("nombre");
-    const carrera = document.getElementById("carrera");
-    const telefono = document.getElementById("telefono");
-    const direccion = document.getElementById("direccion");
-    if (codigo.value == "" || dni.value == "" || nombre.value == ""
-    || telefono.value == "" || direccion.value == "" || carrera.value == "") {
-        alertas('Todo los campos son requeridos', 'warning');
+    const nombres = document.getElementById("nombres");
+    // optional fields
+    const grado = document.getElementById("grado");
+    const seccion = document.getElementById("seccion");
+    const apellido_paterno = document.getElementById("apellido_paterno");
+    const apellido_materno = document.getElementById("apellido_materno");
+    if (codigo.value == "" || dni.value == "" || nombres.value == "") {
+        alertas('Codigo, número de documento y nombres son requeridos', 'warning');
     } else {
         const url = base_url + "Estudiantes/registrar";
         const frm = document.getElementById("frmEstudiante");
@@ -533,10 +537,13 @@ function btnEditarEst(id) {
             document.getElementById("id").value = res.id;
             document.getElementById("codigo").value = res.codigo;
             document.getElementById("dni").value = res.dni;
-            document.getElementById("nombre").value = res.nombre;
-            document.getElementById("carrera").value = res.carrera;
-            document.getElementById("telefono").value = res.telefono;
-            document.getElementById("direccion").value = res.direccion;
+            // Map new fields if present in response
+            document.getElementById("nombres").value = res.nombre ?? (res.nombres ?? '');
+            document.getElementById("grado").value = res.grado ?? '';
+            document.getElementById("seccion").value = res.seccion ?? '';
+            document.getElementById("apellido_paterno").value = res.apellido_paterno ?? '';
+            document.getElementById("apellido_materno").value = res.apellido_materno ?? '';
+            document.getElementById("id_usuario").value = res.id_usuario ?? '';
             $("#nuevoEstudiante").modal("show");
         }
     }

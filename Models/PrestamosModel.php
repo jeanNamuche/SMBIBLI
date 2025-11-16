@@ -46,6 +46,58 @@ class PrestamosModel extends Query
         return $res;
     }
 
+    // Nuevo método: crear una SOLICITUD de préstamo (estado = 0 = pendiente)
+    // NO descuenta stock ni modifica libro (solo cuando admin aprueba)
+    public function insertarSolicitud($id_estudiante, $id_libro, $cantidad, string $fecha_prestamo, string $fecha_devolucion, string $observacion = '')
+    {
+        $id_est_seg = (int)$id_estudiante;
+        $id_lib_seg = (int)$id_libro;
+        $cant_seg = (int)$cantidad;
+        $obs_seg = (string)$observacion;
+
+        $query = "INSERT INTO prestamo(id_estudiante, id_libro, fecha_prestamo, fecha_devolucion, cantidad, observacion, estado) VALUES (?,?,?,?,?,?,?)";
+        $datos = array($id_est_seg, $id_lib_seg, $fecha_prestamo, $fecha_devolucion, $cant_seg, $obs_seg, 0);
+        $data = $this->insert($query, $datos);
+
+        return $data > 0 ? $data : 0;
+    }
+
+    // Método para aprobar una solicitud (cambiar estado de 0 a 1 y descontar stock)
+    public function aprobarSolicitud($id_prestamo)
+    {
+        $id_seg = (int)$id_prestamo;
+
+        // Obtener los datos de la solicitud
+        $sql = "SELECT * FROM prestamo WHERE id = $id_seg AND estado = 0";
+        $prestamo = $this->select($sql);
+
+        if (empty($prestamo)) {
+            return 0; // No existe o no está pendiente
+        }
+
+        $id_libro_seg = (int)$prestamo['id_libro'];
+        $cant_seg = (int)$prestamo['cantidad'];
+
+        // Verificar disponibilidad
+        $lib = "SELECT * FROM libro WHERE id = $id_libro_seg";
+        $resLibro = $this->select($lib);
+
+        if (empty($resLibro) || (int)$resLibro['cantidad'] < $cant_seg) {
+            return 0; // No hay cantidad suficiente
+        }
+
+        // Cambiar estado a 1 (activo)
+        $updateEstado = "UPDATE prestamo SET estado = 1 WHERE id = $id_seg";
+        $this->save($updateEstado, array());
+
+        // Descontar stock del libro
+        $total = (int)$resLibro['cantidad'] - $cant_seg;
+        $updateLibro = "UPDATE libro SET cantidad = ? WHERE id = ?";
+        $this->save($updateLibro, array($total, $id_libro_seg));
+
+        return 1;
+    }
+
     public function actualizarPrestamo($estado, $id)
     {
         // Esta función (la que te di) ya era correcta y segura.
@@ -57,8 +109,8 @@ class PrestamosModel extends Query
         $data = $this->save($sql, $datos); 
 
         if ($data == 1) {
-            // Si el estado es 0 (devuelto), re-sumamos el stock.
-            if ($estado_seguro == 0) {
+            // Si el estado es 2 (devuelto), re-sumamos el stock.
+            if ($estado_seguro == 2) {
                 $sql_prestamo = "SELECT id_libro, cantidad FROM prestamo WHERE id = $id_seguro";
                 $resPrestamo = $this->select($sql_prestamo);
                 
@@ -155,7 +207,7 @@ class PrestamosModel extends Query
     {
         // Esta función ya estaba correcta y segura.
         $id_seguro = (int)$id_prestamo;
-        $sql = "SELECT e.id, e.codigo, e.nombre, e.carrera, l.id, l.titulo, p.id, p.id_estudiante, p.id_libro, p.fecha_prestamo, p.fecha_devolucion, p.cantidad, p.observacion, p.estado 
+        $sql = "SELECT e.id, e.codigo, e.nombre, e.grado, l.id, l.titulo, p.id, p.id_estudiante, p.id_libro, p.fecha_prestamo, p.fecha_devolucion, p.cantidad, p.observacion, p.estado 
                 FROM prestamo p
                 INNER JOIN estudiante e ON p.id_estudiante = e.id
                 INNER JOIN libro l ON p.id_libro = l.id

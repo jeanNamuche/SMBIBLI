@@ -90,7 +90,10 @@ class UsuariosModel extends Query{
     }
     public function actualizarPermisos($usuario, $permiso)
     {
-        $sql = "INSERT INTO detalle_permisos(id_usuario, id_permiso) VALUES (?,?)";
+        // Avoid duplicating the same permission
+        $check = $this->select("SELECT * FROM detalle_permisos WHERE id_usuario = $usuario AND id_permiso = $permiso");
+        if (empty($check)) {
+            $sql = "INSERT INTO detalle_permisos(id_usuario, id_permiso) VALUES (?,?)";
             $datos = array($usuario, $permiso);
             $data = $this->save($sql, $datos);
             if ($data == 1) {
@@ -98,6 +101,9 @@ class UsuariosModel extends Query{
             } else {
                 $res = "error";
             }
+        } else {
+            $res = "ok";
+        }
         return $res;
     }
     public function verificarPermisos($id_user, $permiso)

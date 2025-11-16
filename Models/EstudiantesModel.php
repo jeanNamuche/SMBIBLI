@@ -10,18 +10,22 @@ class EstudiantesModel extends Query{
         $res = $this->selectAll($sql);
         return $res;
     }
-    public function insertarEstudiante($codigo, $dni, $nombre, $carrera, $direccion, $telefono)
+    // New insert signature to match updated schema: codigo_estudiante, numero_documento, grado, seccion,
+    // apellido_paterno, apellido_materno, nombres, id_usuario (nullable)
+    public function insertarEstudiante($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario = null)
     {
-        $verificar = "SELECT * FROM estudiante WHERE codigo = '$codigo'";
+        // Check existence by codigo_estudiante or numero_documento
+        $verificar = "SELECT * FROM estudiante WHERE codigo = '$codigo_estudiante' OR dni = '$numero_documento'";
         $existe = $this->select($verificar);
         if (empty($existe)) {
-            $query = "INSERT INTO estudiante(codigo,dni,nombre,carrera,direccion,telefono) VALUES (?,?,?,?,?,?)";
-            $datos = array($codigo, $dni, $nombre, $carrera, $direccion, $telefono);
-            $data = $this->save($query, $datos);
-            if ($data == 1) {
-                $res = "ok";
+            $query = "INSERT INTO estudiante(codigo, dni, grado, seccion, apellido_paterno, apellido_materno, nombre, id_usuario) VALUES (?,?,?,?,?,?,?,?)";
+            $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+            // Use insert to get last insert id
+            $insertId = $this->insert($query, $datos);
+            if ($insertId > 0) {
+                $res = $insertId;
             } else {
-                $res = "error";
+                $res = 0;
             }
         } else {
             $res = "existe";
@@ -34,10 +38,10 @@ class EstudiantesModel extends Query{
         $res = $this->select($sql);
         return $res;
     }
-    public function actualizarEstudiante($codigo, $dni, $nombre, $carrera, $direccion, $telefono, $id)
+    public function actualizarEstudiante($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id)
     {
-        $query = "UPDATE estudiante SET codigo = ?, dni = ?, nombre = ?, carrera = ?, direccion = ?, telefono = ?  WHERE id = ?";
-        $datos = array($codigo, $dni, $nombre, $carrera, $direccion, $telefono, $id);
+        $query = "UPDATE estudiante SET codigo = ?, dni = ?, grado = ?, seccion = ?, apellido_paterno = ?, apellido_materno = ?, nombre = ?, id_usuario = ? WHERE id = ?";
+        $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id);
         $data = $this->save($query, $datos);
         if ($data == 1) {
             $res = "modificado";

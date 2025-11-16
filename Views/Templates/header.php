@@ -62,6 +62,10 @@
                     <p class="app-sidebar__user-designation"><?php echo isset($_SESSION['usuario']) ? $_SESSION['usuario'] : ''; ?></p>
                 </div>
             </div>
+            <ul class="app-menu">
+                <li><a class="app-menu__item" href="<?php echo base_url; ?>Catalogo"><i class="app-menu__icon fa fa-book"></i><span class="app-menu__label">Catálogo</span></a></li>
+                <li><a class="app-menu__item" href="<?php echo base_url; ?>Catalogo/solicitudes"><i class="app-menu__icon fa fa-clipboard"></i><span class="app-menu__label">Mis Solicitudes</span></a></li>
+            </ul>
         </aside>
         <main class="app-content">
     <?php } else { ?>

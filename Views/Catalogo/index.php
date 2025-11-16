@@ -95,6 +95,40 @@
       </div>
     </div>
 
+    <!-- Modal para solicitar préstamo -->
+    <div class="modal fade" id="modalSolicitud" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h5 class="modal-title">Solicitar Préstamo</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="frmSolicitud">
+              <div class="form-group">
+                <label><strong id="libroTitulo">Libro</strong></label>
+              </div>
+              <div class="form-group">
+                <label for="solCantidad">Cantidad</label>
+                <input type="number" id="solCantidad" class="form-control" name="cantidad" value="1" min="1" max="5" required>
+              </div>
+              <div class="form-group">
+                <label for="solObservacion">Observaciones (opcional)</label>
+                <textarea id="solObservacion" class="form-control" name="observacion" rows="3" placeholder="Ej: Necesito para el 20 de noviembre..."></textarea>
+              </div>
+              <input type="hidden" id="solLibroId" name="id_libro">
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-success" onclick="enviarSolicitud()">Solicitar Préstamo</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
         // Datos inyectados desde PHP
         const libros = <?php echo !empty($libros_list) ? json_encode($libros_list) : '[]'; ?>;
@@ -121,6 +155,9 @@
                             <button class="btn btn-outline-secondary btn-sm btn-detalles" data-id="${libro.id}">Ver detalles</button>
                             ${hasPdf ? `<a href="${baseUrl + libro.pdf_path}" target="_blank" class="btn btn-sm btn-primary">Leer</a>` : `<button class="btn btn-sm btn-light" disabled>Leer</button>`}
                         </div>
+                        <button class="btn btn-success btn-sm btn-block mt-2 btn-solicitud" data-id="${libro.id}" data-titulo="${libro.titulo}">
+                            <i class="fa fa-plus"></i> Solicitar
+                        </button>
                     </div>
                 </div>
             </div>`;
@@ -247,7 +284,60 @@
                     }
                 });
             }
+
+            // Manejar clic en botón "Solicitar Préstamo"
+            document.addEventListener('click', function(e){
+                if (e.target.classList.contains('btn-solicitud')) {
+                    const id = e.target.getAttribute('data-id');
+                    const titulo = e.target.getAttribute('data-titulo');
+                    abrirModalSolicitud(id, titulo);
+                }
+            });
         });
+
+        function abrirModalSolicitud(id_libro, titulo) {
+            document.getElementById('solLibroId').value = id_libro;
+            document.getElementById('libroTitulo').textContent = titulo;
+            document.getElementById('solCantidad').value = '1';
+            document.getElementById('solObservacion').value = '';
+            $('#modalSolicitud').modal('show');
+        }
+
+        function enviarSolicitud() {
+            const id_libro = document.getElementById('solLibroId').value;
+            const cantidad = document.getElementById('solCantidad').value;
+            const observacion = document.getElementById('solObservacion').value;
+
+            if (!id_libro || !cantidad) {
+                Swal.fire('Error', 'Datos incompletos', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('id_libro', id_libro);
+            formData.append('cantidad', cantidad);
+            formData.append('observacion', observacion);
+
+            fetch(baseUrl + 'Catalogo/solicitudPrestamo', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                Swal.fire('Resultado', data.msg, data.icono);
+                if (data.icono === 'success') {
+                    $('#modalSolicitud').modal('hide');
+                    // Recargar tabla de solicitudes si existe
+                    if (typeof cargarMisSolicitudes === 'function') {
+                        cargarMisSolicitudes();
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                Swal.fire('Error', 'No se pudo procesar la solicitud', 'error');
+            });
+        }
     </script>
 
 </div>

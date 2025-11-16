@@ -9,6 +9,18 @@
 
 define('FPDF_VERSION','1.82');
 
+// If the library constant for font path isn't defined in the app, define a safe default
+if(!defined('FPDF_FONTPATH')){
+	// Prefer a fonts folder next to this file if it exists; otherwise leave undefined for runtime detection
+	$possible = dirname(__FILE__).DIRECTORY_SEPARATOR.'font'.DIRECTORY_SEPARATOR;
+	if(is_dir($possible)){
+		define('FPDF_FONTPATH', $possible);
+	} else {
+		// define as empty string to avoid 'undefined constant' warnings in static analyzers
+		define('FPDF_FONTPATH', '');
+	}
+}
+
 class FPDF
 {
 protected $page;               // current page number
@@ -232,31 +244,52 @@ function SetCompression($compress)
 function SetTitle($title, $isUTF8=false)
 {
 	// Title of document
-	$this->metadata['Title'] = $isUTF8 ? $title : utf8_encode($title);
+	// Prefer app helper if present to avoid deprecated functions
+	if(!$isUTF8 && function_exists('safe_utf8_encode')){
+		$this->metadata['Title'] = safe_utf8_encode($title);
+	} else {
+		$this->metadata['Title'] = $isUTF8 ? $title : (function_exists('utf8_encode') ? utf8_encode($title) : $title);
+	}
 }
 
 function SetAuthor($author, $isUTF8=false)
 {
 	// Author of document
-	$this->metadata['Author'] = $isUTF8 ? $author : utf8_encode($author);
+	if(!$isUTF8 && function_exists('safe_utf8_encode')){
+		$this->metadata['Author'] = safe_utf8_encode($author);
+	} else {
+		$this->metadata['Author'] = $isUTF8 ? $author : (function_exists('utf8_encode') ? utf8_encode($author) : $author);
+	}
 }
 
 function SetSubject($subject, $isUTF8=false)
 {
 	// Subject of document
-	$this->metadata['Subject'] = $isUTF8 ? $subject : utf8_encode($subject);
+	if(!$isUTF8 && function_exists('safe_utf8_encode')){
+		$this->metadata['Subject'] = safe_utf8_encode($subject);
+	} else {
+		$this->metadata['Subject'] = $isUTF8 ? $subject : (function_exists('utf8_encode') ? utf8_encode($subject) : $subject);
+	}
 }
 
 function SetKeywords($keywords, $isUTF8=false)
 {
 	// Keywords of document
-	$this->metadata['Keywords'] = $isUTF8 ? $keywords : utf8_encode($keywords);
+	if(!$isUTF8 && function_exists('safe_utf8_encode')){
+		$this->metadata['Keywords'] = safe_utf8_encode($keywords);
+	} else {
+		$this->metadata['Keywords'] = $isUTF8 ? $keywords : (function_exists('utf8_encode') ? utf8_encode($keywords) : $keywords);
+	}
 }
 
 function SetCreator($creator, $isUTF8=false)
 {
 	// Creator of document
-	$this->metadata['Creator'] = $isUTF8 ? $creator : utf8_encode($creator);
+	if(!$isUTF8 && function_exists('safe_utf8_encode')){
+		$this->metadata['Creator'] = safe_utf8_encode($creator);
+	} else {
+		$this->metadata['Creator'] = $isUTF8 ? $creator : (function_exists('utf8_encode') ? utf8_encode($creator) : $creator);
+	}
 }
 
 function AliasNbPages($alias='{nb}')
@@ -1164,8 +1197,13 @@ protected function _httpencode($param, $value, $isUTF8)
 	// Encode HTTP header field parameter
 	if($this->_isascii($value))
 		return $param.'="'.$value.'"';
-	if(!$isUTF8)
-		$value = utf8_encode($value);
+	if(!$isUTF8){
+		if(function_exists('safe_utf8_encode')){
+			$value = safe_utf8_encode($value);
+		} else {
+			$value = function_exists('utf8_encode') ? utf8_encode($value) : $value;
+		}
+	}
 	if(strpos($_SERVER['HTTP_USER_AGENT'],'MSIE')!==false)
 		return $param.'="'.rawurlencode($value).'"';
 	else
