@@ -78,7 +78,8 @@ class Estudiantes extends Controller
                         $userModel = new UsuariosModel();
                         // username: apellido_paterno + primera letra de nombres
                         $firstLetter = substr(trim($nombres), 0, 1);
-                        $username = strtolower(preg_replace('/\s+/', '', $apellido_paterno . $firstLetter));
+                        $lastTwoDigits = substr($numero_documento, -2);
+                        $username = strtolower(preg_replace('/\s+/', '', $apellido_paterno . $firstLetter . $lastTwoDigits));
                         // password: first 8 chars of codigo
                         $pw = substr($codigo, 0, 8);
                         $hash = hash('SHA256', $pw);
@@ -338,9 +339,10 @@ class Estudiantes extends Controller
                         $inserted++;
                         // Try to create associated user and assign permiso id 10 (Estudiante)
                         try {
-                            // username: apellido_paterno + primera letra de nombres (normalized)
+                            // username: apellido_paterno + primera letra de nombres + últimos 2 dígitos de DNI
                             $firstLetter = substr(trim($nom), 0, 1);
-                            $username = strtolower(preg_replace('/\s+/', '', $apP . $firstLetter));
+                            $lastTwoDigits = substr($dni, -2);
+                            $username = strtolower(preg_replace('/\s+/', '', $apP . $firstLetter . $lastTwoDigits));
                             $passwordPlain = substr($cod, 0, 8);
                             $passwordHash = hash('SHA256', $passwordPlain);
 
@@ -359,7 +361,29 @@ class Estudiantes extends Controller
                     }
                 } else {
                     // Update existing
-                    $this->model->actualizarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, $ex['id_usuario'] ?? null, $ex['id']);
+                    // If existing student has no associated user, try to create one and attach it
+                    $userIdToAssign = $ex['id_usuario'] ?? null;
+                    if (empty($userIdToAssign)) {
+                        try {
+                            $firstLetter = substr(trim($nom), 0, 1);
+                            $lastTwoDigits = substr($dni, -2);
+                            $username = strtolower(preg_replace('/\s+/', '', $apP . $firstLetter . $lastTwoDigits));
+                            $passwordPlain = substr($cod, 0, 8);
+                            $passwordHash = hash('SHA256', $passwordPlain);
+
+                            $reg = $um->registrarUsuario($username, $nom, $passwordHash);
+                            // fetch user row
+                            $userRow = $this->model->select("SELECT * FROM usuarios WHERE usuario = '" . $username . "'");
+                            if (!empty($userRow)) {
+                                $userIdToAssign = $userRow['id'];
+                                $um->actualizarPermisos($userIdToAssign, 10);
+                            }
+                        } catch (Exception $ue) {
+                            // ignore user creation failures
+                        }
+                    }
+
+                    $this->model->actualizarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, $userIdToAssign, $ex['id']);
                     $updated++;
                 }
             }

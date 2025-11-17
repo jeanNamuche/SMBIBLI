@@ -22,19 +22,21 @@ class UsuariosModel extends Query{
         $this->usuario = $usuario;
         $this->nombre = $nombre;
         $this->clave = $clave;
-        $vericar = "SELECT * FROM usuarios WHERE usuario = '$this->usuario'";
-        $existe = $this->select($vericar);
-        if (empty($existe)) {
-            # code...
+        // Check if this exact username already exists
+        $verify = "SELECT * FROM usuarios WHERE usuario = '$this->usuario'";
+        $exists = $this->select($verify);
+        if (empty($exists)) {
+            // Username is unique, insert it
             $sql = "INSERT INTO usuarios(usuario, nombre, clave) VALUES (?,?,?)";
             $datos = array($this->usuario, $this->nombre, $this->clave);
             $data = $this->save($sql, $datos);
             if ($data == 1) {
                 $res = "ok";
-            }else{
+            } else {
                 $res = "error";
             }
-        }else{
+        } else {
+            // Username already exists, return exists (caller should handle collision)
             $res = "existe";
         }
         return $res;
