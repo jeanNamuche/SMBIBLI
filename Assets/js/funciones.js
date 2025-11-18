@@ -231,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function(){
         dataSrc: ''
     },
     columns: [
-        { 'data': 'id_p' }, // <-- ¡ESTA ES LA CORRECCIÓN!
+        { 'data': 'id_p' }, 
         { 'data': 'titulo' },
         { 'data': 'nombre' },
         { 'data': 'fecha_prestamo' },

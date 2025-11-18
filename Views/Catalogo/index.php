@@ -158,6 +158,9 @@
                         <button class="btn btn-success btn-sm btn-block mt-2 btn-solicitud" data-id="${libro.id}" data-titulo="${libro.titulo}">
                             <i class="fa fa-plus"></i> Solicitar
                         </button>
+                        ${hasPdf ? `<button class="btn btn-info btn-sm btn-block mt-2 btn-quiz" data-id="${libro.id}" title="Quiz y Rompecabezas">
+                            <i class="fa fa-puzzle-piece"></i> Quiz
+                        </button>` : ''}
                     </div>
                 </div>
             </div>`;
@@ -292,6 +295,12 @@
                     const titulo = e.target.getAttribute('data-titulo');
                     abrirModalSolicitud(id, titulo);
                 }
+                // Manejar clic en botón "Quiz"
+                if (e.target.classList.contains('btn-quiz') || e.target.closest('.btn-quiz')) {
+                    const btn = e.target.classList.contains('btn-quiz') ? e.target : e.target.closest('.btn-quiz');
+                    const idLibro = btn.getAttribute('data-id');
+                    abrirMenuQuiz(idLibro);
+                }
             });
         });
 
@@ -337,6 +346,39 @@
                 console.error(err);
                 Swal.fire('Error', 'No se pudo procesar la solicitud', 'error');
             });
+        }
+
+        // Funciones para el módulo de Quiz
+        function abrirMenuQuiz(idLibro) {
+            Swal.fire({
+                title: 'Elegir Actividad',
+                html: `
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-info" onclick="irAlQuiz(${idLibro})">
+                            <i class="fas fa-question-circle"></i> Quiz
+                        </button>
+                        <button class="btn btn-warning" onclick="irAlRompecabezas(${idLibro})">
+                            <i class="fas fa-puzzle-piece"></i> Rompecabezas
+                        </button>
+                    </div>
+                `,
+                showConfirmButton: false,
+                didOpen: () => {
+                    // Agregar estilos personalizados
+                    const swalContent = Swal.getHtmlContainer();
+                    if (swalContent) {
+                        swalContent.style.textAlign = 'center';
+                    }
+                }
+            });
+        }
+
+        function irAlQuiz(idLibro) {
+            window.location.href = baseUrl + 'Quiz/resolver?tipo=quiz&id=' + idLibro;
+        }
+
+        function irAlRompecabezas(idLibro) {
+            window.location.href = baseUrl + 'Quiz/resolver?tipo=rompecabezas&id=' + idLibro;
         }
     </script>
 

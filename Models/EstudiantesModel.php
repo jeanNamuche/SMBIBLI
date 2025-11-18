@@ -73,4 +73,31 @@ class EstudiantesModel extends Query{
         }
         return $tiene;
     }
+
+    // Obtener id de estudiante por id_usuario; si no existe, crear un registro básico y devolver el id
+    public function obtenerOCrearPorUsuario($id_usuario, $nombre = '')
+    {
+        $id_usuario = (int)$id_usuario;
+        if ($id_usuario <= 0) return 0;
+        $sql = "SELECT id FROM estudiante WHERE id_usuario = " . $id_usuario;
+        $res = $this->select($sql);
+        if (!empty($res) && isset($res['id'])) {
+            return (int)$res['id'];
+        }
+
+        // No existe: crear un registro mínimo. Usamos valores por defecto para campos requeridos.
+        $codigo = 'USR' . $id_usuario;
+        $dni = 'DNI' . $id_usuario . substr((string)time(), -4);
+        $grado = null;
+        $seccion = null;
+        $apellido_paterno = null;
+        $apellido_materno = null;
+        $nombres = $nombre ?: 'Usuario ' . $id_usuario;
+
+        $nuevoId = $this->insertarEstudiante($codigo, $dni, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+        if ($nuevoId && is_numeric($nuevoId)) {
+            return (int)$nuevoId;
+        }
+        return 0;
+    }
 }

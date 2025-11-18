@@ -42,7 +42,7 @@
     }
     ?>
     <?php if ($esAlumno) { ?>
-        <!-- Solo mostrar el header básico y el catálogo -->
+        <!-- Solo mostrar el header básico y el catálogo para alumnos -->
         <header class="app-header"><a class="app-header__logo" href="<?php echo base_url; ?>Catalogo">SAN MARTIN</a>
             <ul class="app-nav">
                 <li class="dropdown"><a class="app-nav__item" href="#" data-toggle="dropdown" aria-label="Open Profile Menu"><i class="fa fa-user fa-lg"></i></a>
@@ -53,7 +53,7 @@
                 </li>
             </ul>
         </header>
-        <!-- Sidebar reducido para alumno: mostrar avatar y nombre, sin menú -->
+        <!-- Sidebar reducido para alumno: mostrar avatar y nombre, sin menú de administración -->
         <div class="app-sidebar__overlay" data-toggle="sidebar"></div>
         <aside class="app-sidebar">
             <div class="app-sidebar__user"><img class="app-sidebar__user-avatar" src="<?php echo base_url; ?>Assets/img/logo.png" alt="User Image" width="50">
@@ -126,6 +126,7 @@
                         <li><a class="treeview-item" target="_blank" href="<?php echo base_url; ?>Prestamos/pdf"><i class="icon fa fa-file-pdf-o"></i>Libros Prestados</a></li>
                     </ul>
                 </li>
+                <li><a class="app-menu__item" href="<?php echo base_url; ?>Quiz"><i class="app-menu__icon fa fa-puzzle-piece"></i><span class="app-menu__label">Quiz y Rompecabezas</span></a></li>
             </ul>
         </aside>
         <main class="app-content">
