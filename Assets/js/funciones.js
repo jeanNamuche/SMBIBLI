@@ -25,6 +25,22 @@ document.addEventListener("DOMContentLoaded", function(){
         }
 
     }
+    // prepare logo as dataURL for pdf export (pdfMake requires dataURLs)
+    let pdfLogoData = null;
+    function blobToDataURL(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+    // try to fetch logo; failure is non-blocking
+    fetch(base_url + 'Assets/img/logo.png').then(r => {
+        if (r.ok) return r.blob();
+        throw new Error('logo fetch failed');
+    }).then(blobToDataURL).then(data => { pdfLogoData = data; }).catch(() => { pdfLogoData = null; });
+
     const  buttons = [{
                 //Botón para Excel
                 extend: 'excel',
@@ -41,7 +57,27 @@ document.addEventListener("DOMContentLoaded", function(){
                 footer: true,
                 title: 'Archivo PDF',
                 filename: 'reporte',
-                text: '<button class="btn btn-danger"><i class="fa fa-file-pdf-o"></i></button>'
+                text: '<button class="btn btn-danger"><i class="fa fa-file-pdf-o"></i></button>',
+                customize: function (doc) {
+                    // insert a header with logo (if available) and institute title
+                    const instituteTitle = 'Institución San Martin';
+                    const header = [];
+                    if (pdfLogoData) {
+                        header.push({ image: pdfLogoData, width: 50 });
+                    }
+                    header.push({ text: instituteTitle + '\n', style: 'title', alignment: 'center', margin: [0, 10, 0, 0] });
+                    // prepend header
+                    doc.content.splice(0, 0, { columns: header, margin: [0, 0, 0, 10] });
+                    // add small footer
+                    if (!doc.footer) {
+                        doc.footer = function(currentPage, pageCount) {
+                            return { text: 'Página ' + currentPage.toString() + ' de ' + pageCount, alignment: 'center', margin: [0, 5, 0, 0] };
+                        };
+                    }
+                    // styles
+                    if (!doc.styles) doc.styles = {};
+                    doc.styles.title = { fontSize: 12, bold: true };
+                }
             },
             //Botón para print
             {
@@ -89,6 +125,7 @@ document.addEventListener("DOMContentLoaded", function(){
             {'data': 'codigo'},
             {'data': 'dni'},
             {'data': 'grado'},
+            {'data': 'nivel'},
             {'data': 'seccion'},
             {'data': 'apellido_paterno'},
             {'data': 'apellido_materno'},
@@ -491,6 +528,8 @@ function frmEstudiante() {
     document.getElementById("btnAccion").textContent = "Registrar";
     document.getElementById("frmEstudiante").reset();
     document.getElementById("id").value = "";
+    // reset nivel select if present
+    if (document.getElementById("nivel")) document.getElementById("nivel").value = "";
     $("#nuevoEstudiante").modal("show");
 }
 
@@ -540,6 +579,7 @@ function btnEditarEst(id) {
             // Map new fields if present in response
             document.getElementById("nombres").value = res.nombre ?? (res.nombres ?? '');
             document.getElementById("grado").value = res.grado ?? '';
+            if (document.getElementById("nivel")) document.getElementById("nivel").value = res.nivel ?? '';
             document.getElementById("seccion").value = res.seccion ?? '';
             document.getElementById("apellido_paterno").value = res.apellido_paterno ?? '';
             document.getElementById("apellido_materno").value = res.apellido_materno ?? '';
@@ -718,7 +758,7 @@ function frmAutor() {
 
 function registrarAutor(e) {
     e.preventDefault();
-    const autor = document.getElementById("autor");
+    const autor = document.getElementById("nombre");
     if (autor.value == "") {
         alertas('El nombre es requerido', 'warning');
     } else {
@@ -750,7 +790,7 @@ function btnEditarAutor(id) {
         if (this.readyState == 4 && this.status == 200) {
             const res = JSON.parse(this.responseText);
             document.getElementById("id").value = res.id;
-            document.getElementById("autor").value = res.autor;
+            document.getElementById("nombre").value = res.autor;
             document.getElementById("foto_actual").value = res.imagen;
             document.getElementById("img-preview").src = base_url + 'Assets/img/autor/' + res.imagen;
             document.getElementById("icon-image").classList.add("d-none");
@@ -827,7 +867,7 @@ function frmEditorial() {
 
 function registrarEditorial(e) {
     e.preventDefault();
-    const editorial = document.getElementById("editorial");
+    const editorial = document.getElementById("nombre");
     if (editorial.value == "") {
         alertas('El editorial es requerido', 'warning');
     } else {
@@ -858,7 +898,7 @@ function btnEditarEdi(id) {
         if (this.readyState == 4 && this.status == 200) {
             const res = JSON.parse(this.responseText);
             document.getElementById("id").value = res.id;
-            document.getElementById("editorial").value = res.editorial;
+            document.getElementById("nombre").value = res.editorial;
             $("#nuevoEditorial").modal("show");
         }
     }
@@ -967,24 +1007,28 @@ function registrarLibro(e) {
     const materia = document.getElementById("materia");
     const cantidad = document.getElementById("cantidad");
     const num_pagina = document.getElementById("num_pagina");
+    const nivel = document.getElementById("nivel");
+    const lugar_estante = document.getElementById("lugar_estante");
+    const anio_edicion = document.getElementById("anio_edicion");
 
-    if (titulo.value == '' || autor.value == '' || editorial.value == ''
-    || materia.value == '' || cantidad.value == '' || num_pagina.value == '') {
+    if (titulo.value == '' || autor.value == '' || editorial.value == '' ||
+        materia.value == '' || cantidad.value == '' || num_pagina.value == '' || nivel.value == '' || lugar_estante.value == '' || anio_edicion.value == '') {
         alertas('Todo los campos son requeridos', 'warning');
-    } else {
-        const url = base_url + "Libros/registrar";
-        const frm = document.getElementById("frmLibro");
-        const http = new XMLHttpRequest();
-        http.open("POST", url, true);
-        http.send(new FormData(frm));
-        http.onreadystatechange = function () {
-            if (this.readyState == 4 && this.status == 200) {
-                const res = JSON.parse(this.responseText);
-                $("#nuevoLibro").modal("hide");
-                tblLibros.ajax.reload();
-                frm.reset();
-                alertas(res.msg, res.icono);
-            }
+        return false;
+    }
+
+    const url = base_url + "Libros/registrar";
+    const frm = document.getElementById("frmLibro");
+    const http = new XMLHttpRequest();
+    http.open("POST", url, true);
+    http.send(new FormData(frm));
+    http.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            const res = JSON.parse(this.responseText);
+            $("#nuevoLibro").modal("hide");
+            tblLibros.ajax.reload();
+            frm.reset();
+            alertas(res.msg, res.icono);
         }
     }
 }
@@ -1052,8 +1096,30 @@ function btnEditarLibro(id) {
                   document.getElementById("materia").value = res.id_materia;
               }
               document.getElementById("cantidad").value = res.cantidad;
-              document.getElementById("num_pagina").value = res.num_pagina;
-              document.getElementById("anio_edicion").value = res.anio_edicion;
+              // Nivel y lugar_estante (si vienen vacíos, mantener valores por defecto)
+              if (res.nivel !== undefined) {
+                  try {
+                      const $nivel = $('#nivel');
+                      if ($nivel.length) {
+                          if ($nivel.find("option[value='" + res.nivel + "']").length === 0) {
+                              const option = new Option(res.nivel || 'Sin nivel', res.nivel, true, true);
+                              $nivel.append(option).trigger('change');
+                          } else {
+                              $nivel.val(res.nivel).trigger('change');
+                          }
+                      } else {
+                          document.getElementById("nivel").value = res.nivel;
+                      }
+                  } catch (e) {
+                      document.getElementById("nivel").value = res.nivel;
+                  }
+              }
+              if (res.lugar_estante !== undefined) {
+                  document.getElementById("lugar_estante").value = res.lugar_estante;
+              }
+              if (res.anio_edicion !== undefined) {
+                  document.getElementById("anio_edicion").value = res.anio_edicion;
+              }
               document.getElementById("descripcion").value = res.descripcion;
             document.getElementById("img-preview").src = base_url + 'Assets/img/libros/'+ res.imagen;
             document.getElementById("icon-cerrar").innerHTML = `

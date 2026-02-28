@@ -26,6 +26,7 @@ class Estudiantes extends Controller
         for ($i = 0; $i < count($data); $i++) {
             // Ensure expected keys exist (if DB hasn't migrated yet, these will be set to empty strings)
             $data[$i]['grado'] = $data[$i]['grado'] ?? '';
+            $data[$i]['nivel'] = $data[$i]['nivel'] ?? '';
             $data[$i]['seccion'] = $data[$i]['seccion'] ?? '';
             $data[$i]['apellido_paterno'] = $data[$i]['apellido_paterno'] ?? '';
             $data[$i]['apellido_materno'] = $data[$i]['apellido_materno'] ?? '';
@@ -57,6 +58,7 @@ class Estudiantes extends Controller
         $numero_documento = strClean($_POST['dni']);
         $grado = isset($_POST['grado']) ? strClean($_POST['grado']) : '';
         $seccion = isset($_POST['seccion']) ? strClean($_POST['seccion']) : '';
+        $nivel = isset($_POST['nivel']) ? strClean($_POST['nivel']) : null;
         $apellido_paterno = isset($_POST['apellido_paterno']) ? strClean($_POST['apellido_paterno']) : '';
         $apellido_materno = isset($_POST['apellido_materno']) ? strClean($_POST['apellido_materno']) : '';
         $nombres = isset($_POST['nombres']) ? strClean($_POST['nombres']) : '';
@@ -68,7 +70,7 @@ class Estudiantes extends Controller
         } else {
             // If creating new student
             if ($id == "") {
-                $insertId = $this->model->insertarEstudiante($codigo, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+                $insertId = $this->model->insertarEstudiante($codigo, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $nivel);
                 if ($insertId == "existe") {
                     $msg = array('msg' => 'El estudiante ya existe', 'icono' => 'warning');
                 } else if ($insertId > 0) {
@@ -90,7 +92,7 @@ class Estudiantes extends Controller
                             if ($u) {
                                 $id_user_created = $u['id'];
                                 // update student with id_usuario
-                                $this->model->actualizarEstudiante($codigo, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_user_created, $insertId);
+                                        $this->model->actualizarEstudiante($codigo, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_user_created, $insertId, $nivel);
                             }
                         }
                     }
@@ -103,7 +105,7 @@ class Estudiantes extends Controller
                 $current = $this->model->editEstudiante($id);
                 $existing_user_id = $current ? ($current['id_usuario'] ?? null) : null;
                 $id_usuario_final = $existing_user_id ? $existing_user_id : $id_usuario;
-                $data = $this->model->actualizarEstudiante($codigo, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario_final, $id);
+                $data = $this->model->actualizarEstudiante($codigo, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario_final, $id, $nivel);
                 if ($data == "modificado") {
                     $msg = array('msg' => 'Estudiante modificado', 'icono' => 'success');
                 } else {
@@ -236,6 +238,7 @@ class Estudiantes extends Controller
                 if (strpos($n, 'codigo') !== false) $colMap['codigo'] = $j;
                 if (strpos($n, 'documento') !== false || strpos($n, 'dni') !== false) $colMap['dni'] = $j;
                 if (strpos($n, 'grado') !== false) $colMap['grado'] = $j;
+                if (strpos($n, 'nivel') !== false) $colMap['nivel'] = $j;
                 if (strpos($n, 'seccion') !== false) $colMap['seccion'] = $j;
                 if (strpos($n, 'apellido paterno') !== false) $colMap['apPaterno'] = $j;
                 if (strpos($n, 'apellido materno') !== false) $colMap['apMaterno'] = $j;
@@ -289,6 +292,8 @@ class Estudiantes extends Controller
             $inserted = 0;
             $updated = 0;
             $skipped = 0;
+            $seenCodigos = array();
+            $seenDnis = array();
             
             // Process data rows
             for ($r = $headerRowIdx + 1; $r <= count($rows); $r++) {
@@ -314,9 +319,14 @@ class Estudiantes extends Controller
                 $dni = $toUTF8(trim((string)$getCell($row, $colMap, 'dni')));
                 $grado = $toUTF8(trim((string)$getCell($row, $colMap, 'grado')));
                 $secc = $toUTF8(trim((string)$getCell($row, $colMap, 'seccion')));
+                $nivelRow = $toUTF8(trim((string)$getCell($row, $colMap, 'nivel')));
                 $apP = $toUTF8(trim((string)$getCell($row, $colMap, 'apPaterno')));
                 $apM = $toUTF8(trim((string)$getCell($row, $colMap, 'apMaterno')));
                 $nom = $toUTF8(trim((string)$getCell($row, $colMap, 'nombres')));
+
+                // collect seen identifiers for optional synchronization
+                if ($cod !== '') $seenCodigos[] = $cod;
+                if ($dni !== '') $seenDnis[] = $dni;
                 
                 // Validate required fields
                 if (empty($dni) || (empty($nom))) {
@@ -334,7 +344,7 @@ class Estudiantes extends Controller
                 
                 if (empty($ex)) {
                     // New student
-                    $id = $this->model->insertarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, null);
+                    $id = $this->model->insertarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, null, $nivelRow);
                     if ($id > 0) {
                         $inserted++;
                         // Try to create associated user and assign permiso id 10 (Estudiante)
@@ -351,7 +361,7 @@ class Estudiantes extends Controller
                             $userRow = $this->model->select("SELECT * FROM usuarios WHERE usuario = '" . $username . "'");
                             if (!empty($userRow)) {
                                 // update estudiante with id_usuario
-                                $this->model->actualizarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, $userRow['id'], $id);
+                                $this->model->actualizarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, $userRow['id'], $id, $nivelRow);
                                 // assign permission 10 (estudiante)
                                 $um->actualizarPermisos($userRow['id'], 10);
                             }
@@ -383,12 +393,47 @@ class Estudiantes extends Controller
                         }
                     }
 
-                    $this->model->actualizarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, $userIdToAssign, $ex['id']);
+                    $this->model->actualizarEstudiante($cod, $dni, $grado, $secc, $apP, $apM, $nom, $userIdToAssign, $ex['id'], $nivelRow);
                     $updated++;
                 }
             }
             
-            $msg = array('msg' => "✅ $inserted nuevos, $updated actualizados, $skipped omitidos", 'icono' => 'success');
+            // If the user requested synchronization, deactivate missing students and their users
+            $deactivated = 0;
+            if (!empty($_POST['sync_missing'])) {
+                // normalize unique lists
+                $seenCodigos = array_values(array_filter(array_unique($seenCodigos)));
+                $seenDnis = array_values(array_filter(array_unique($seenDnis)));
+
+                // Build conditions
+                $condCodigo = '1=1';
+                $condDni = '1=1';
+                if (!empty($seenCodigos)) {
+                    $quoted = array_map(function($v){ return "'".addslashes($v)."'"; }, $seenCodigos);
+                    $condCodigo = "codigo NOT IN (" . implode(',', $quoted) . ")";
+                }
+                if (!empty($seenDnis)) {
+                    $quoted2 = array_map(function($v){ return "'".addslashes($v)."'"; }, $seenDnis);
+                    $condDni = "dni NOT IN (" . implode(',', $quoted2) . ")";
+                }
+
+                // Find students currently active that are NOT present in the CSV (both codigo and dni absent)
+                $sqlMissing = "SELECT id, id_usuario FROM estudiante WHERE ($condCodigo) AND ($condDni) AND estado = 1";
+                $missingRows = $this->model->selectAll($sqlMissing);
+                if (!empty($missingRows)) {
+                    require_once 'Models/UsuariosModel.php';
+                    $um = new UsuariosModel();
+                    foreach ($missingRows as $mr) {
+                        $this->model->estadoEstudiante(0, $mr['id']);
+                        if (!empty($mr['id_usuario'])) {
+                            $um->accionUser(0, $mr['id_usuario']);
+                        }
+                        $deactivated++;
+                    }
+                }
+            }
+
+            $msg = array('msg' => "✅ $inserted nuevos, $updated actualizados, $skipped omitidos" . ($deactivated ? ", $deactivated desactivados" : ''), 'icono' => 'success');
             
         } catch (Exception $e) {
             if ($msg['msg'] === 'Error desconocido') {

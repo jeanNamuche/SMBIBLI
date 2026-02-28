@@ -252,8 +252,7 @@ class Quiz extends Controller {
 
             $preguntas = $this->model->obtenerPreguntasLibro($id_libro);
             
-            // Solo retornar las primeras 5 preguntas
-            $preguntas = array_slice($preguntas, 0, 5);
+            
             
             // Cargar opciones y mezclarlas
             foreach ($preguntas as &$preg) {

@@ -65,6 +65,7 @@
             <ul class="app-menu">
                 <li><a class="app-menu__item" href="<?php echo base_url; ?>Catalogo"><i class="app-menu__icon fa fa-book"></i><span class="app-menu__label">Catálogo</span></a></li>
                 <li><a class="app-menu__item" href="<?php echo base_url; ?>Catalogo/solicitudes"><i class="app-menu__icon fa fa-clipboard"></i><span class="app-menu__label">Mis Solicitudes</span></a></li>
+                <li><a class="app-menu__item" href="<?php echo base_url; ?>Creditos"><i class="app-menu__icon fa fa-film"></i><span class="app-menu__label">Créditos</span></a></li>
             </ul>
         </aside>
         <main class="app-content">
@@ -126,6 +127,7 @@
                         <li><a class="treeview-item" target="_blank" href="<?php echo base_url; ?>Prestamos/pdf"><i class="icon fa fa-file-pdf-o"></i>Libros Prestados</a></li>
                     </ul>
                 </li>
+                <li><a class="app-menu__item" href="<?php echo base_url; ?>Creditos"><i class="app-menu__icon fa fa-film"></i><span class="app-menu__label">Créditos</span></a></li>
                 <li><a class="app-menu__item" href="<?php echo base_url; ?>Quiz"><i class="app-menu__icon fa fa-puzzle-piece"></i><span class="app-menu__label">Quiz y Rompecabezas</span></a></li>
             </ul>
         </aside>

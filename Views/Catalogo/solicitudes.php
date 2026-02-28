@@ -166,7 +166,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h2><i class="fa fa-clipboard-list"></i> Mis Solicitudes de Préstamo</h2>
-            <p class="text-muted">Revisa el estado de tus solicitudes de préstamos de libros</p>
+            <p color="#fff">Revisa el estado de tus solicitudes de préstamos de libros</p>
         </div>
     </div>
 

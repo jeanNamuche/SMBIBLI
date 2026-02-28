@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.2
+-- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 14-05-2021 a las 13:46:05
--- Versión del servidor: 10.4.14-MariaDB
--- Versión de PHP: 7.4.9
+-- Tiempo de generación: 18-12-2025 a las 15:22:38
+-- Versión del servidor: 8.0.42
+-- Versión de PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Base de datos: `biblioteca_mvc`
+-- Base de datos: `biblioteca`
 --
 
 -- --------------------------------------------------------
@@ -28,20 +28,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `autor` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `autor` varchar(150) NOT NULL,
   `imagen` varchar(100) NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `autor`
---
-
-INSERT INTO `autor` (`id`, `autor`, `imagen`, `estado`) VALUES
-(1, 'ultima prueba', 'logo.png', 1),
-(2, 'cambiar el nombre llll', '20210514132528.jpg', 1),
-(3, 'popoiipippi', 'logo.png', 1);
+  `estado` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -50,20 +41,13 @@ INSERT INTO `autor` (`id`, `autor`, `imagen`, `estado`) VALUES
 --
 
 CREATE TABLE `configuracion` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `nombre` varchar(200) NOT NULL,
   `telefono` varchar(20) NOT NULL,
   `direccion` text NOT NULL,
   `correo` varchar(100) NOT NULL,
   `foto` varchar(50) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `configuracion`
---
-
-INSERT INTO `configuracion` (`id`, `nombre`, `telefono`, `direccion`, `correo`, `foto`) VALUES
-(1, 'Vida Informático', '925491523', 'Lima - Perú', 'angelsifuentes@gmail.com', 'logo.png');
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -72,21 +56,10 @@ INSERT INTO `configuracion` (`id`, `nombre`, `telefono`, `direccion`, `correo`, 
 --
 
 CREATE TABLE `detalle_permisos` (
-  `id` int(11) NOT NULL,
-  `id_usuario` int(11) NOT NULL,
-  `id_permiso` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `detalle_permisos`
---
-
-INSERT INTO `detalle_permisos` (`id`, `id_usuario`, `id_permiso`) VALUES
-(5, 2, 1),
-(6, 2, 2),
-(7, 2, 3),
-(8, 2, 5),
-(9, 2, 8);
+  `id` int NOT NULL,
+  `id_usuario` int NOT NULL,
+  `id_permiso` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -95,18 +68,10 @@ INSERT INTO `detalle_permisos` (`id`, `id_usuario`, `id_permiso`) VALUES
 --
 
 CREATE TABLE `editorial` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `editorial` varchar(150) NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `editorial`
---
-
-INSERT INTO `editorial` (`id`, `editorial`, `estado`) VALUES
-(1, 'Ninguna', 1),
-(2, 'Toribio anyarin', 0);
+  `estado` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -115,23 +80,18 @@ INSERT INTO `editorial` (`id`, `editorial`, `estado`) VALUES
 --
 
 CREATE TABLE `estudiante` (
-  `id` int(11) NOT NULL,
-  `codigo` varchar(20) NOT NULL,
-  `dni` varchar(20) NOT NULL,
+  `id` int NOT NULL,
+  `codigo` varchar(50) NOT NULL,
+  `dni` varchar(50) NOT NULL,
   `nombre` varchar(150) NOT NULL,
-  `carrera` varchar(255) NOT NULL,
-  `direccion` text NOT NULL,
-  `telefono` varchar(15) NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `estudiante`
---
-
-INSERT INTO `estudiante` (`id`, `codigo`, `dni`, `nombre`, `carrera`, `direccion`, `telefono`, `estado`) VALUES
-(1, '12345', '74589745', 'Angel sifuentes', 'Ingenieria de sistemas', 'Lima peru', '925491523', 1),
-(2, '465', '9779879', 'Prueba', 'Ingenieria', 'Lima', '987978456', 1);
+  `estado` int NOT NULL DEFAULT '1',
+  `grado` varchar(50) DEFAULT NULL,
+  `seccion` varchar(50) DEFAULT NULL,
+  `nivel` varchar(20) DEFAULT 'Primaria',
+  `apellido_paterno` varchar(100) DEFAULT NULL,
+  `apellido_materno` varchar(100) DEFAULT NULL,
+  `id_usuario` int DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -140,28 +100,21 @@ INSERT INTO `estudiante` (`id`, `codigo`, `dni`, `nombre`, `carrera`, `direccion
 --
 
 CREATE TABLE `libro` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `titulo` text NOT NULL,
-  `cantidad` int(11) NOT NULL,
-  `id_autor` int(11) NOT NULL,
-  `id_editorial` int(11) NOT NULL,
+  `cantidad` int NOT NULL,
+  `nivel` varchar(50) DEFAULT NULL,
+  `lugar_estante` varchar(50) DEFAULT NULL,
+  `id_autor` int NOT NULL,
+  `id_editorial` int NOT NULL,
   `anio_edicion` date NOT NULL,
-  `id_materia` int(11) NOT NULL,
-  `num_pagina` int(11) NOT NULL,
+  `id_materia` int NOT NULL,
+  `num_pagina` int NOT NULL,
   `descripcion` text NOT NULL,
   `imagen` varchar(100) NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `libro`
---
-
-INSERT INTO `libro` (`id`, `titulo`, `cantidad`, `id_autor`, `id_editorial`, `anio_edicion`, `id_materia`, `num_pagina`, `descripcion`, `imagen`, `estado`) VALUES
-(1, 'poiopioioiop', 50, 1, 1, '2021-05-08', 1, 1335, 'si', 'logo.png', 1),
-(2, 'Javascript', 69, 1, 1, '2021-05-08', 2, 1478, 'Domina javascript', '20210514132615.jpg', 1),
-(3, 'python para todos', 23, 1, 1, '2021-05-08', 1, 258, 'anaconda', 'logo.png', 1),
-(4, 'ultima prueba', 23, 1, 1, '2021-05-14', 1, 569, '', '20210514132757.jpg', 1);
+  `estado` int NOT NULL DEFAULT '1',
+  `pdf_path` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -170,20 +123,10 @@ INSERT INTO `libro` (`id`, `titulo`, `cantidad`, `id_autor`, `id_editorial`, `an
 --
 
 CREATE TABLE `materia` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `materia` text NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `materia`
---
-
-INSERT INTO `materia` (`id`, `materia`, `estado`) VALUES
-(1, 'Base de Datos', 1),
-(2, 'Ingenieria de Software', 1),
-(3, 'Algebra', 1),
-(4, 'Matematica', 1);
+  `estado` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -192,25 +135,10 @@ INSERT INTO `materia` (`id`, `materia`, `estado`) VALUES
 --
 
 CREATE TABLE `permisos` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `nombre` varchar(50) NOT NULL,
-  `tipo` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `permisos`
---
-
-INSERT INTO `permisos` (`id`, `nombre`, `tipo`) VALUES
-(1, 'Libros', 1),
-(2, 'Autor', 2),
-(3, 'Editorial', 3),
-(4, 'Usuarios', 4),
-(5, 'Configuracion', 5),
-(6, 'Estudiantes', 6),
-(7, 'Materias', 7),
-(8, 'Reportes', 8),
-(9, 'Prestamos', 9);
+  `tipo` int NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -219,23 +147,93 @@ INSERT INTO `permisos` (`id`, `nombre`, `tipo`) VALUES
 --
 
 CREATE TABLE `prestamo` (
-  `id` int(11) NOT NULL,
-  `id_estudiante` int(11) NOT NULL,
-  `id_libro` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `id_estudiante` int NOT NULL,
+  `id_libro` int NOT NULL,
   `fecha_prestamo` date NOT NULL,
   `fecha_devolucion` date NOT NULL,
-  `cantidad` int(11) NOT NULL,
+  `cantidad` int NOT NULL,
   `observacion` text NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  `estado` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
 
 --
--- Volcado de datos para la tabla `prestamo`
+-- Estructura de tabla para la tabla `quiz_intentos`
 --
 
-INSERT INTO `prestamo` (`id`, `id_estudiante`, `id_libro`, `fecha_prestamo`, `fecha_devolucion`, `cantidad`, `observacion`, `estado`) VALUES
-(1, 1, 1, '2021-05-11', '2021-05-11', 5, '', 0),
-(2, 1, 2, '2021-05-11', '2021-05-11', 15, '', 0);
+CREATE TABLE `quiz_intentos` (
+  `id` int NOT NULL,
+  `id_estudiante` int NOT NULL,
+  `id_libro` int NOT NULL,
+  `tipo` enum('quiz','rompecabezas') NOT NULL,
+  `puntuacion` int DEFAULT NULL,
+  `respuestas` json DEFAULT NULL,
+  `estado` int DEFAULT '1',
+  `fecha_intento` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `quiz_opciones`
+--
+
+CREATE TABLE `quiz_opciones` (
+  `id` int NOT NULL,
+  `id_pregunta` int NOT NULL,
+  `texto_opcion` varchar(255) NOT NULL,
+  `es_correcta` int DEFAULT '0',
+  `orden` int DEFAULT NULL,
+  `estado` int DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `quiz_preguntas`
+--
+
+CREATE TABLE `quiz_preguntas` (
+  `id` int NOT NULL,
+  `id_libro` int NOT NULL,
+  `texto_pregunta` varchar(500) NOT NULL,
+  `tipo` enum('multiple_choice','verdadero_falso') DEFAULT 'multiple_choice',
+  `numero_pregunta` int DEFAULT NULL,
+  `estado` int DEFAULT '1',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `quiz_rompecabezas`
+--
+
+CREATE TABLE `quiz_rompecabezas` (
+  `id` int NOT NULL,
+  `id_libro` int NOT NULL,
+  `titulo` varchar(255) NOT NULL,
+  `instrucciones` varchar(500) DEFAULT NULL,
+  `estado` int DEFAULT '1',
+  `fecha_creacion` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `quiz_rompecabezas_piezas`
+--
+
+CREATE TABLE `quiz_rompecabezas_piezas` (
+  `id` int NOT NULL,
+  `id_rompecabezas` int NOT NULL,
+  `texto_pieza` varchar(255) NOT NULL,
+  `posicion_correcta` int NOT NULL,
+  `orden_display` int DEFAULT NULL,
+  `estado` int DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 
 -- --------------------------------------------------------
 
@@ -244,20 +242,12 @@ INSERT INTO `prestamo` (`id`, `id_estudiante`, `id_libro`, `fecha_prestamo`, `fe
 --
 
 CREATE TABLE `usuarios` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `usuario` varchar(50) NOT NULL,
   `nombre` varchar(200) NOT NULL,
   `clave` varchar(100) NOT NULL,
-  `estado` int(11) NOT NULL DEFAULT 1
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Volcado de datos para la tabla `usuarios`
---
-
-INSERT INTO `usuarios` (`id`, `usuario`, `nombre`, `clave`, `estado`) VALUES
-(1, 'admin', 'Angel sifuentes', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 1),
-(2, 'angel', 'Vida Informatico', '519ba91a5a5b4afb9dc66f8805ce8c442b6576316c19c6896af2fa9bda6aff71', 1);
+  `estado` int NOT NULL DEFAULT '1'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Índices para tablas volcadas
@@ -293,7 +283,8 @@ ALTER TABLE `editorial`
 -- Indices de la tabla `estudiante`
 --
 ALTER TABLE `estudiante`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_estudiante_usuario` (`id_usuario`);
 
 --
 -- Indices de la tabla `libro`
@@ -325,6 +316,42 @@ ALTER TABLE `prestamo`
   ADD KEY `id_libro` (`id_libro`);
 
 --
+-- Indices de la tabla `quiz_intentos`
+--
+ALTER TABLE `quiz_intentos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_libro` (`id_libro`),
+  ADD KEY `idx_estudiante_libro` (`id_estudiante`,`id_libro`);
+
+--
+-- Indices de la tabla `quiz_opciones`
+--
+ALTER TABLE `quiz_opciones`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_pregunta` (`id_pregunta`);
+
+--
+-- Indices de la tabla `quiz_preguntas`
+--
+ALTER TABLE `quiz_preguntas`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_libro_numero` (`id_libro`,`numero_pregunta`);
+
+--
+-- Indices de la tabla `quiz_rompecabezas`
+--
+ALTER TABLE `quiz_rompecabezas`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `id_libro` (`id_libro`);
+
+--
+-- Indices de la tabla `quiz_rompecabezas_piezas`
+--
+ALTER TABLE `quiz_rompecabezas_piezas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_rompecabezas` (`id_rompecabezas`);
+
+--
 -- Indices de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
@@ -338,61 +365,91 @@ ALTER TABLE `usuarios`
 -- AUTO_INCREMENT de la tabla `autor`
 --
 ALTER TABLE `autor`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `configuracion`
 --
 ALTER TABLE `configuracion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `detalle_permisos`
 --
 ALTER TABLE `detalle_permisos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `editorial`
 --
 ALTER TABLE `editorial`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `estudiante`
 --
 ALTER TABLE `estudiante`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `libro`
 --
 ALTER TABLE `libro`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `materia`
 --
 ALTER TABLE `materia`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `permisos`
 --
 ALTER TABLE `permisos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `prestamo`
 --
 ALTER TABLE `prestamo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `quiz_intentos`
+--
+ALTER TABLE `quiz_intentos`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `quiz_opciones`
+--
+ALTER TABLE `quiz_opciones`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `quiz_preguntas`
+--
+ALTER TABLE `quiz_preguntas`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `quiz_rompecabezas`
+--
+ALTER TABLE `quiz_rompecabezas`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `quiz_rompecabezas_piezas`
+--
+ALTER TABLE `quiz_rompecabezas_piezas`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de la tabla `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Restricciones para tablas volcadas
@@ -404,6 +461,12 @@ ALTER TABLE `usuarios`
 ALTER TABLE `detalle_permisos`
   ADD CONSTRAINT `detalle_permisos_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`),
   ADD CONSTRAINT `detalle_permisos_ibfk_2` FOREIGN KEY (`id_permiso`) REFERENCES `permisos` (`id`);
+
+--
+-- Filtros para la tabla `estudiante`
+--
+ALTER TABLE `estudiante`
+  ADD CONSTRAINT `fk_estudiante_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Filtros para la tabla `libro`
@@ -419,6 +482,37 @@ ALTER TABLE `libro`
 ALTER TABLE `prestamo`
   ADD CONSTRAINT `prestamo_ibfk_1` FOREIGN KEY (`id_estudiante`) REFERENCES `estudiante` (`id`),
   ADD CONSTRAINT `prestamo_ibfk_2` FOREIGN KEY (`id_libro`) REFERENCES `libro` (`id`);
+
+--
+-- Filtros para la tabla `quiz_intentos`
+--
+ALTER TABLE `quiz_intentos`
+  ADD CONSTRAINT `quiz_intentos_ibfk_1` FOREIGN KEY (`id_estudiante`) REFERENCES `estudiante` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `quiz_intentos_ibfk_2` FOREIGN KEY (`id_libro`) REFERENCES `libro` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `quiz_opciones`
+--
+ALTER TABLE `quiz_opciones`
+  ADD CONSTRAINT `quiz_opciones_ibfk_1` FOREIGN KEY (`id_pregunta`) REFERENCES `quiz_preguntas` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `quiz_preguntas`
+--
+ALTER TABLE `quiz_preguntas`
+  ADD CONSTRAINT `quiz_preguntas_ibfk_1` FOREIGN KEY (`id_libro`) REFERENCES `libro` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `quiz_rompecabezas`
+--
+ALTER TABLE `quiz_rompecabezas`
+  ADD CONSTRAINT `quiz_rompecabezas_ibfk_1` FOREIGN KEY (`id_libro`) REFERENCES `libro` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `quiz_rompecabezas_piezas`
+--
+ALTER TABLE `quiz_rompecabezas_piezas`
+  ADD CONSTRAINT `quiz_rompecabezas_piezas_ibfk_1` FOREIGN KEY (`id_rompecabezas`) REFERENCES `quiz_rompecabezas` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

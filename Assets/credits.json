@@ -1,0 +1,25 @@
+{
+  "title": "CREDITOS - PROYECTO DE BIBLIOTECA 'SAN MARTIN'",
+  "items": [
+    {
+      "role": "DIRECCION",
+      "names": ["JEAN JOEL","IYA MARIANA"]
+    },
+    {
+      "role": "PROGRAMADOR:",
+      "names": ["NAMUCHE CALDERON JEAN JOEL"]
+    },
+    {
+      "role": "PROGRAMADOR:",
+      "names": ["RUMICHE DURAN IYA MARIANA"]
+    },
+    {
+      "role": "COORDINADOR DE PROYECTO:",
+      "names": ["HENRY EUGENIO"]
+    },
+    {
+      "role": "OBJETIVO:",
+      "names": ["La biblioteca virtual busca potenciar", "la comprensión lectora de los estudiantes de la institución educativa,", "fomentando la lectura y alineándose al objetivo de desarrollo", "sostenible N° 04, que busca la educación de calidad."]
+    }
+  ]
+}

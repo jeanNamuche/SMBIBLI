@@ -60,7 +60,9 @@ class Libros extends Controller
         $editorial = strClean($_POST['editorial']);
         $materia = strClean($_POST['materia']);
         $cantidad = strClean($_POST['cantidad']);
-        $num_pagina = strClean($_POST['num_pagina']);
+        $num_pagina = isset($_POST['num_pagina']) ? strClean($_POST['num_pagina']) : 0;
+        $nivel = strClean($_POST['nivel']);
+        $lugar_estante = strClean($_POST['lugar_estante']);
         $anio_edicion = strClean($_POST['anio_edicion']);
         $descripcion = strClean($_POST['descripcion']);
         $id = strClean($_POST['id']);
@@ -96,7 +98,7 @@ class Libros extends Controller
                 $imgNombre = "logo.png";
             }
             if ($id == "") {
-                $data = $this->model->insertarLibros($titulo, $autor, $editorial, $materia, $cantidad, $num_pagina, $anio_edicion, $descripcion, $imgNombre, $pdfPath);
+                $data = $this->model->insertarLibros($titulo, $autor, $editorial, $materia, $cantidad, $num_pagina, $nivel, $lugar_estante, $anio_edicion, $descripcion, $imgNombre, $pdfPath);
                 if ($data == "ok") {
                     if (!empty($name)) {
                         move_uploaded_file($tmpName, $destino);
@@ -104,6 +106,9 @@ class Libros extends Controller
                     $msg = array('msg' => 'Libro registrado', 'icono' => 'success');
                 } else if ($data == "existe") {
                     $msg = array('msg' => 'El libro ya existe', 'icono' => 'warning');
+                } else if (is_string($data) && strpos($data, 'error:') === 0) {
+                    $detalle = trim(substr($data, 6));
+                    $msg = array('msg' => 'Error al registrar: ' . $detalle, 'icono' => 'error');
                 } else {
                     $msg = array('msg' => 'Error al registrar', 'icono' => 'error');
                 }
@@ -118,14 +123,19 @@ class Libros extends Controller
                 if ($pdfPath === null && isset($imgDelete['pdf_path'])) {
                     $pdfPath = $imgDelete['pdf_path'];
                 }
-                $data = $this->model->actualizarLibros($titulo, $autor, $editorial, $materia, $cantidad, $num_pagina, $anio_edicion, $descripcion, $imgNombre, $pdfPath, $id);
+                $data = $this->model->actualizarLibros($titulo, $autor, $editorial, $materia, $cantidad, $num_pagina, $nivel, $lugar_estante, $anio_edicion, $descripcion, $imgNombre, $pdfPath, $id);
                 if ($data == "modificado") {
                     if (!empty($name)) {
                         move_uploaded_file($tmpName, $destino);
                     }
                     $msg = array('msg' => 'Libro modificado', 'icono' => 'success');
                 } else {
-                    $msg = array('msg' => 'Error al modificar', 'icono' => 'error');
+                        if (is_string($data) && strpos($data, 'error:') === 0) {
+                            $detalle = trim(substr($data, 6));
+                            $msg = array('msg' => 'Error al modificar: ' . $detalle, 'icono' => 'error');
+                        } else {
+                            $msg = array('msg' => 'Error al modificar', 'icono' => 'error');
+                        }
                 }
             }
         }
@@ -177,7 +187,14 @@ class Libros extends Controller
     {
         if (isset($_GET['lb'])) {
             $valor = $_GET['lb'];
-            $data = $this->model->buscarLibro($valor);
+            $nivel = null;
+            if (!empty($_SESSION['id_usuario'])) {
+                require_once 'Models/EstudiantesModel.php';
+                $estModel = new EstudiantesModel();
+                $row = $estModel->select("SELECT nivel FROM estudiante WHERE id_usuario = " . (int)$_SESSION['id_usuario']);
+                if (!empty($row) && isset($row['nivel'])) $nivel = $row['nivel'];
+            }
+            $data = $this->model->buscarLibro($valor, $nivel);
             echo json_encode($data, JSON_UNESCAPED_UNICODE);
             die();
         }

@@ -2,7 +2,7 @@
 
 <style>
     .pregunta-container {
-        background: #f8f9fa;
+        background: #b2bfccff;
         padding: 20px;
         border-radius: 8px;
         margin-bottom: 20px;
@@ -15,8 +15,8 @@
     }
 
     .pregunta-container.incorrecta {
-        background: #f8d7da;
-        border: 2px solid #dc3545;
+        background: #e6e0f8;
+        border: 2px solid #6a11cb;
     }
 
     .opcion-btn {
@@ -91,8 +91,8 @@
     }
 
     .resultado-fallo {
-        background: #f8d7da;
-        color: #721c24;
+        background: #fff3cd;
+        color: #856404;
     }
 </style>
 
@@ -121,7 +121,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <button class="btn btn-primary btn-lg" onclick="enviarQuiz()">
-                <i class="fa fa-check"></i> Enviar Respuestas
+                Enviar Respuestas
             </button>
         </div>
     </div>
@@ -156,7 +156,7 @@
     <div class="row">
         <div class="col-12 text-center">
             <button class="btn btn-primary btn-lg" onclick="enviarRompecabezas()">
-                <i class="fa fa-check"></i> Verificar Rompecabezas
+                Verificar Rompecabezas
             </button>
         </div>
     </div>
@@ -169,11 +169,9 @@
             <div id="resultadoCard" class="tile resultado-mensaje"></div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-12 text-center">
-            <button class="btn btn-primary" onclick="location.href=baseUrl+'Catalogo'">
-                <i class="fa fa-arrow-left"></i> Volver al Catálogo
-            </button>
+    <div class="row mt-4">
+        <div class="col-12 text-center" id="resultadoBotones">
+            <!-- Botones se inyectan vía JS -->
         </div>
     </div>
 </div>
@@ -195,7 +193,7 @@
     }
 
     function cargarQuiz() {
-        document.getElementById('tipoActividad').innerHTML = '<i class="fa fa-question-circle"></i> Quiz (5 Preguntas)';
+        document.getElementById('tipoActividad').innerHTML = 'Quiz';
         document.getElementById('quizContainer').style.display = 'block';
 
         console.log('Cargando Quiz para libro:', idLibro);
@@ -224,17 +222,18 @@
                             html += '</button>';
                         });
                     } else {
-                        html += '<p class="text-danger">Error: No hay opciones para esta pregunta</p>';
+                        html += '<p class="text-warning">Error: No hay opciones para esta pregunta</p>';
                     }
                     html += '</div>';
                     html += '</div>';
                 });
 
                 document.getElementById('preguntasContainer').innerHTML = html;
+                actualizarProgreso(); // Actualizar progreso inicial a 0/total
             })
             .catch(err => {
                 console.error('Error en cargarQuiz:', err);
-                document.getElementById('preguntasContainer').innerHTML = '<p class="alert alert-danger"><i class="fa fa-exclamation-circle"></i> Error al cargar quiz</p>';
+                alert-warning
             });
     }
 
@@ -277,7 +276,7 @@
     }
 
     function cargarRompecabezas() {
-        document.getElementById('tipoActividad').innerHTML = '<i class="fa fa-puzzle-piece"></i> Rompecabezas';
+        document.getElementById('tipoActividad').innerHTML = 'Rompecabezas';
         document.getElementById('rompecabezasContainer').style.display = 'block';
 
         console.log('Cargando Rompecabezas para libro:', idLibro);
@@ -402,13 +401,37 @@
 
         const resultCard = document.getElementById('resultadoCard');
         let clase = 'resultado-fallo';
-        if (porcentaje >= 80) clase = 'resultado-exito';
-        else if (porcentaje >= 60) clase = 'resultado-parcial';
+        let iconoResultado = '<i class="fa fa-times-circle fa-3x text-warning"></i>';
+        
+        if (porcentaje >= 80) {
+            clase = 'resultado-exito';
+            iconoResultado = '<i class="fa fa-check-circle fa-3x text-success"></i>';
+        } else if (porcentaje >= 60) {
+            clase = 'resultado-parcial';
+            iconoResultado = '<i class="fa fa-exclamation-circle fa-3x text-warning"></i>';
+        }
 
         resultCard.className = 'tile resultado-mensaje ' + clase;
-        resultCard.innerHTML = '✅ ¡Completado!<br>';
-        resultCard.innerHTML += 'Puntuación: <strong>' + porcentaje + '%</strong><br>';
-        resultCard.innerHTML += '(' + puntuacion + ' de ' + total + ' correctas)';
+        resultCard.innerHTML = '<div>' + iconoResultado + '</div><div class="mt-3">¡Completado!</div>';
+        resultCard.innerHTML += '<div class="mt-2">Puntuación: <strong>' + porcentaje + '%</strong></div>';
+        resultCard.innerHTML += '<div class="small text-muted">(' + puntuacion + ' de ' + total + ' correctas)</div>';
+
+        // Generar botones
+        const buttonsContainer = document.getElementById('resultadoBotones');
+        let otherGameBtn = '';
+        let replayBtn = '<button class="btn btn-warning mx-2" onclick="location.reload()"><i class="fa fa-redo"></i> Volver a jugar</button>';
+        
+        if (tipoActividad === 'quiz') {
+             otherGameBtn = `<button class="btn btn-info mx-2" onclick="location.href='${baseUrl}Quiz/resolver?tipo=rompecabezas&id=${idLibro}'"><i class="fa fa-puzzle-piece"></i> Realizar Rompecabezas</button>`;
+        } else {
+             otherGameBtn = `<button class="btn btn-info mx-2" onclick="location.href='${baseUrl}Quiz/resolver?tipo=quiz&id=${idLibro}'"><i class="fa fa-question-circle"></i> Realizar Cuestionario</button>`;
+        }
+
+        buttonsContainer.innerHTML = `
+            ${replayBtn}
+            ${otherGameBtn}
+            <button class="btn btn-secondary mx-2" onclick="location.href='${baseUrl}Catalogo'"><i class="fa fa-arrow-left"></i> Volver al Catálogo</button>
+        `;
     }
 
     // Cargar al iniciar

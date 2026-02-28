@@ -99,14 +99,30 @@
                     </div>
                     <div class="col-md-3">
                         <div class="form-group">
-                            <label for="num_pagina">Cantidad de página</label>
-                            <input id="num_pagina" class="form-control" type="number" name="num_pagina" placeholder="Cantidad Página" required>
+                            <label for="nivel">Nivel</label>
+                            <select id="nivel" class="form-control" name="nivel" required>
+                                <option value="">Seleccionar nivel</option>
+                                <option value="Primaria">Primaria</option>
+                                <option value="Secundaria">Secundaria</option>
+                            </select>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="lugar_estante">Lugar en Estante</label>
+                            <input id="lugar_estante" class="form-control" type="text" name="lugar_estante" placeholder="Ej: A1, B2" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
                         <div class="form-group">
                             <label for="anio_edicion">Año Edición</label>
                             <input id="anio_edicion" class="form-control" type="date" name="anio_edicion" value="<?php echo date("Y-m-d"); ?>" required>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="num_pagina">Número de Páginas</label>
+                            <input id="num_pagina" class="form-control" type="number" name="num_pagina" placeholder="Ej: 200" required>
                         </div>
                     </div>
                     <div class="col-md-5">

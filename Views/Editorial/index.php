@@ -41,9 +41,9 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="editorial">Nombre</label>
+                                <label for="nombre">Nombre</label>
                                 <input type="hidden" id="id" name="id">
-                                <input id="editorial" class="form-control" type="text" name="editorial" required placeholder="Nombre de Editorial">
+                                <input id="nombre" class="form-control" type="text" name="editorial" required placeholder="Nombre de Editorial">
                             </div>
                         </div>
 

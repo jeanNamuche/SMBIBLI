@@ -169,23 +169,26 @@ class Prestamos extends Controller
         $pdf->AddPage();
         $pdf->SetMargins(10, 10, 10);
         $pdf->SetTitle("Prestamos");
-        $pdf->SetFont('Arial', 'B', 12);
-    $pdf->Cell(195, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['nombre']) : (function_exists('utf8_decode') ? utf8_decode($datos['nombre']) : $datos['nombre'])), 0, 1, 'C');
 
-        $pdf->Image(base_url. "Assets/img/logo.png", 180, 10, 30, 30, 'PNG');
-        $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(20, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode("Teléfono: ") : (function_exists('utf8_decode') ? utf8_decode("Teléfono: ") : "Teléfono: ")), 0, 0, 'L');
+        // Header: logo (left) + company name and contact (center) + separator
+        $logoLocal = dirname(__DIR__) . '/Assets/img/logo.png';
+        if (file_exists($logoLocal)) {
+            $pdf->Image($logoLocal, 10, 8, 28);
+        } else {
+            $pdf->Image(base_url . "Assets/img/logo.png", 10, 8, 28);
+        }
+        $pdf->SetFont('Arial', 'B', 14);
+        $pdf->Cell(0, 6, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['nombre']) : (function_exists('utf8_decode') ? utf8_decode($datos['nombre']) : $datos['nombre'])), 0, 1, 'C');
         $pdf->SetFont('Arial', '', 10);
-        $pdf->Cell(20, 5, $datos['telefono'], 0, 1, 'L');
-        $pdf->SetFont('Arial', 'B', 10);
-    $pdf->Cell(20, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode("Dirección: ") : (function_exists('utf8_decode') ? utf8_decode("Dirección: ") : "Dirección: ")), 0, 0, 'L');
-        $pdf->SetFont('Arial', '', 10);
-    $pdf->Cell(20, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['direccion']) : (function_exists('utf8_decode') ? utf8_decode($datos['direccion']) : $datos['direccion'])), 0, 1, 'L');
-        $pdf->SetFont('Arial', 'B', 10);
-        $pdf->Cell(20, 5, "Correo: ", 0, 0, 'L');
-        $pdf->SetFont('Arial', '', 10);
-    $pdf->Cell(20, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['correo']) : (function_exists('utf8_decode') ? utf8_decode($datos['correo']) : $datos['correo'])), 0, 1, 'L');
-        $pdf->Ln();
+        $contactLine = trim($datos['direccion'] . ' - Tel: ' . $datos['telefono']);
+        $pdf->Cell(0, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($contactLine) : (function_exists('utf8_decode') ? utf8_decode($contactLine) : $contactLine)), 0, 1, 'C');
+        $pdf->Cell(0, 5, 'Correo: ' . (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['correo']) : (function_exists('utf8_decode') ? utf8_decode($datos['correo']) : $datos['correo'])), 0, 1, 'C');
+        $pdf->Ln(2);
+        $y = $pdf->GetY();
+        $w = $pdf->GetPageWidth();
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Line(10, $y, $w - 10, $y);
+        $pdf->Ln(6);
         $pdf->SetFont('Arial', 'B', 10);
         $pdf->SetFillColor(0, 0, 0);
         $pdf->SetTextColor(255, 255, 255);
@@ -220,23 +223,26 @@ class Prestamos extends Controller
         $pdf->AddPage();
         $pdf->SetMargins(5, 5, 5);
         $pdf->SetTitle("Prestamos");
-        $pdf->SetFont('Arial', 'B', 12);
-    $pdf->Cell(65, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['nombre']) : (function_exists('utf8_decode') ? utf8_decode($datos['nombre']) : $datos['nombre'])), 0, 1, 'C');
 
-        $pdf->Image(base_url . "Assets/img/logo.png", 55, 15, 20, 20, 'PNG');
-        $pdf->SetFont('Arial', 'B', 8);
-    $pdf->Cell(15, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode("Teléfono: ") : (function_exists('utf8_decode') ? utf8_decode("Teléfono: ") : "Teléfono: ")), 0, 0, 'L');
+        // Header for ticket: scaled logo left + centered company name and contact
+        $logoLocal = dirname(__DIR__) . '/Assets/img/logo.png';
+        if (file_exists($logoLocal)) {
+            $pdf->Image($logoLocal, 6, 6, 18);
+        } else {
+            $pdf->Image(base_url . "Assets/img/logo.png", 6, 6, 18);
+        }
+        $pdf->SetFont('Arial', 'B', 12);
+        $pdf->Cell(0, 6, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['nombre']) : (function_exists('utf8_decode') ? utf8_decode($datos['nombre']) : $datos['nombre'])), 0, 1, 'C');
         $pdf->SetFont('Arial', '', 8);
-        $pdf->Cell(15, 5, $datos['telefono'], 0, 1, 'L');
-        $pdf->SetFont('Arial', 'B', 8);
-    $pdf->Cell(15, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode("Dirección: ") : (function_exists('utf8_decode') ? utf8_decode("Dirección: ") : "Dirección: ")), 0, 0, 'L');
-        $pdf->SetFont('Arial', '', 8);
-    $pdf->Cell(15, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['direccion']) : (function_exists('utf8_decode') ? utf8_decode($datos['direccion']) : $datos['direccion'])), 0, 1, 'L');
-        $pdf->SetFont('Arial', 'B', 8);
-        $pdf->Cell(15, 5, "Correo: ", 0, 0, 'L');
-        $pdf->SetFont('Arial', '', 8);
-    $pdf->Cell(15, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['correo']) : (function_exists('utf8_decode') ? utf8_decode($datos['correo']) : $datos['correo'])), 0, 1, 'L');
-        $pdf->Ln();
+        $contactLine = trim($datos['direccion'] . ' - Tel: ' . $datos['telefono']);
+        $pdf->Cell(0, 5, (function_exists('safe_utf8_decode') ? safe_utf8_decode($contactLine) : (function_exists('utf8_decode') ? utf8_decode($contactLine) : $contactLine)), 0, 1, 'C');
+        $pdf->Cell(0, 5, 'Correo: ' . (function_exists('safe_utf8_decode') ? safe_utf8_decode($datos['correo']) : (function_exists('utf8_decode') ? utf8_decode($datos['correo']) : $datos['correo'])), 0, 1, 'C');
+        $pdf->Ln(2);
+        $y = $pdf->GetY();
+        $w = $pdf->GetPageWidth();
+        $pdf->SetDrawColor(0, 0, 0);
+        $pdf->Line(5, $y, $w - 5, $y);
+        $pdf->Ln(4);
         $pdf->SetFont('Arial', 'B', 8);
         $pdf->SetFillColor(0, 0, 0);
         $pdf->SetTextColor(255, 255, 255);

@@ -18,6 +18,7 @@
                                 <th>Código</th>
                                 <th>Dni</th>
                                 <th>Grado</th>
+                                <th>Nivel</th>
                                 <th>Sección</th>
                                 <th>Apellido Paterno</th>
                                 <th>Apellido Materno</th>
@@ -79,6 +80,16 @@
                         </div>
                         <div class="col-md-4">
                             <div class="form-group">
+                                <label for="nivel">Nivel</label>
+                                <select id="nivel" class="form-control" name="nivel" required>
+                                    <option value="">Seleccionar nivel</option>
+                                    <option value="Primaria">Primaria</option>
+                                    <option value="Secundaria">Secundaria</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
                                 <label for="apellido_paterno">Apellido paterno</label>
                                 <input id="apellido_paterno" class="form-control" type="text" name="apellido_paterno" placeholder="Apellido paterno">
                             </div>
@@ -122,6 +133,10 @@
                     <div class="form-group">
                         <label for="file_excel">Seleccionar archivo Excel o CSV</label>
                         <input type="file" id="file_excel" name="file_excel" class="form-control" accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    <div class="form-group form-check">
+                        <input type="checkbox" class="form-check-input" id="sync_missing" name="sync_missing">
+                        <label class="form-check-label" for="sync_missing">Sincronizar: desactivar estudiantes que no están en el archivo</label>
                     </div>
                     <div class="form-group">
                         <button class="btn btn-primary" type="button" onclick="importarExcel(event)">Importar</button>

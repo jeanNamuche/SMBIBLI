@@ -1,0 +1,40 @@
+/* Simple vertical scrolling credits */
+.credits-viewport {
+  height: 400px;
+  overflow: hidden;
+  position: relative;
+  background: #ffffff;
+  border: 1px solid #e6e6e6;
+  padding: 20px;
+}
+.credits-content {
+  display: block;
+  width: 100%;
+  text-align: center;
+  animation: scrollUp linear infinite;
+  -webkit-animation-play-state: running;
+}
+.credits-item {
+  font-size: 16px;
+  line-height: 28px;
+  color: #222;
+  margin: 6px 0;
+}
+.credits-role {
+  font-weight: 700;
+  margin-top: 12px;
+}
+.credits-name {
+  font-weight: 400;
+}
+
+/* default duration will be overridden by JS based on content height */
+@keyframes scrollUp {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(-100%); }
+}
+
+/* pause animation when hovering */
+.credits-viewport:hover .credits-content {
+  animation-play-state: paused;
+}

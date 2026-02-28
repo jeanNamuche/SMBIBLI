@@ -11,18 +11,48 @@ class LibrosModel extends Query
         $res = $this->selectAll($sql);
         return $res;
     }
-    public function insertarLibros($titulo,$id_autor,$id_editorial,$id_materia,$cantidad,$num_pagina,$anio_edicion,$descripcion,$imgNombre,$pdfPath=null)
+    public function insertarLibros($titulo,$id_autor,$id_editorial,$id_materia,$cantidad,$num_pagina,$nivel,$lugar_estante,$anio_edicion,$descripcion,$imgNombre,$pdfPath=null)
     {
         $verificar = "SELECT * FROM libro WHERE titulo = '$titulo'";
         $existe = $this->select($verificar);
         if (empty($existe)) {
-            $query = "INSERT INTO libro(titulo, id_autor, id_editorial, id_materia, cantidad, num_pagina, anio_edicion, descripcion, imagen, pdf_path) VALUES (?,?,?,?,?,?,?,?,?,?)";
-            $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $num_pagina, $anio_edicion, $descripcion, $imgNombre, $pdfPath);
-            $data = $this->save($query, $datos);
-            if ($data == 1) {
-                $res = "ok";
+            // Verificar si la tabla tiene las nuevas columnas
+            $cols = array('nivel', 'lugar_estante', 'anio_edicion');
+            $in = "'" . implode("','", $cols) . "'";
+            $sqlCols = "SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='".db."' AND TABLE_NAME='libro' AND COLUMN_NAME IN ($in)";
+            $cntRes = $this->select($sqlCols);
+            $usesNew = ($cntRes && isset($cntRes['cnt']) && $cntRes['cnt'] == count($cols));
+
+            // Verificar si existe la columna num_pagina
+            $sqlNum = "SELECT COUNT(*) AS cnt_num FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='".db."' AND TABLE_NAME='libro' AND COLUMN_NAME='num_pagina'";
+            $numRes = $this->select($sqlNum);
+            $hasNum = ($numRes && isset($numRes['cnt_num']) && $numRes['cnt_num'] > 0);
+
+            if ($usesNew) {
+                if ($hasNum) {
+                    // Orden de columnas: nivel, lugar_estante, anio_edicion, num_pagina, descripcion, imagen, pdf_path
+                    $query = "INSERT INTO libro(titulo, id_autor, id_editorial, id_materia, cantidad, nivel, lugar_estante, anio_edicion, num_pagina, descripcion, imagen, pdf_path) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+                    $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $nivel, $lugar_estante, (!empty($anio_edicion) ? $anio_edicion : date('Y-m-d')), (!empty($num_pagina) ? $num_pagina : 0), $descripcion, $imgNombre, $pdfPath);
+                } else {
+                    // No existe num_pagina en esquema nuevo
+                    $query = "INSERT INTO libro(titulo, id_autor, id_editorial, id_materia, cantidad, nivel, lugar_estante, anio_edicion, descripcion, imagen, pdf_path) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+                    $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $nivel, $lugar_estante, (!empty($anio_edicion) ? $anio_edicion : date('Y-m-d')), $descripcion, $imgNombre, $pdfPath);
+                }
             } else {
-                $res = "error";
+                // Base de datos antigua: usar anio_edicion (hoy) y num_pagina = 0 para compatibilidad
+                $query = "INSERT INTO libro(titulo, id_autor, id_editorial, id_materia, cantidad, anio_edicion, num_pagina, descripcion, imagen, pdf_path) VALUES (?,?,?,?,?,?,?,?,?,?)";
+                $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, date('Y-m-d'), 0, $descripcion, $imgNombre, $pdfPath);
+            }
+
+            try {
+                $data = $this->save($query, $datos);
+                if ($data == 1) {
+                    $res = "ok";
+                } else {
+                    $res = "error";
+                }
+            } catch (Exception $e) {
+                $res = "error: " . $e->getMessage();
             }
         } else {
             $res = "existe";
@@ -40,15 +70,45 @@ class LibrosModel extends Query
         $res = $this->select($sql);
         return $res;
     }
-    public function actualizarLibros($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $num_pagina, $anio_edicion, $descripcion, $imgNombre, $pdfPath, $id)
+    public function actualizarLibros($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $num_pagina, $nivel, $lugar_estante, $anio_edicion, $descripcion, $imgNombre, $pdfPath, $id)
     {
-    $query = "UPDATE libro SET titulo = ?, id_autor=?, id_editorial=?, id_materia=?, cantidad=?, num_pagina=?, anio_edicion=?, descripcion=?, imagen=?, pdf_path=? WHERE id = ?";
-    $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $num_pagina, $anio_edicion, $descripcion, $imgNombre, $pdfPath, $id);
-        $data = $this->save($query, $datos);
-        if ($data == 1) {
-            $res = "modificado";
+        // Detectar esquema
+        $cols = array('nivel', 'lugar_estante');
+        $in = "'" . implode("','", $cols) . "'";
+        $sqlCols = "SELECT COUNT(*) AS cnt FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='".db."' AND TABLE_NAME='libro' AND COLUMN_NAME IN ($in)";
+        $cntRes = $this->select($sqlCols);
+        $usesNew = ($cntRes && isset($cntRes['cnt']) && $cntRes['cnt'] == count($cols));
+
+        // Verificar si existe la columna num_pagina
+        $sqlNum = "SELECT COUNT(*) AS cnt_num FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='".db."' AND TABLE_NAME='libro' AND COLUMN_NAME='num_pagina'";
+        $numRes = $this->select($sqlNum);
+        $hasNum = ($numRes && isset($numRes['cnt_num']) && $numRes['cnt_num'] > 0);
+
+        if ($usesNew) {
+            $anio = (!empty($anio_edicion)) ? $anio_edicion : date('Y-m-d');
+            if ($hasNum) {
+                // Orden: nivel, lugar_estante, anio_edicion, num_pagina, descripcion, imagen, pdf_path
+                $query = "UPDATE libro SET titulo = ?, id_autor=?, id_editorial=?, id_materia=?, cantidad=?, nivel=?, lugar_estante=?, anio_edicion=?, num_pagina=?, descripcion=?, imagen=?, pdf_path=? WHERE id = ?";
+                $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $nivel, $lugar_estante, $anio, (!empty($num_pagina) ? $num_pagina : 0), $descripcion, $imgNombre, $pdfPath, $id);
+            } else {
+                $query = "UPDATE libro SET titulo = ?, id_autor=?, id_editorial=?, id_materia=?, cantidad=?, nivel=?, lugar_estante=?, anio_edicion=?, descripcion=?, imagen=?, pdf_path=? WHERE id = ?";
+                $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, $nivel, $lugar_estante, $anio, $descripcion, $imgNombre, $pdfPath, $id);
+            }
         } else {
-            $res = "error";
+            // BD antigua: actualizar anio_edicion con fecha actual y num_pagina a 0 si es necesario
+            $query = "UPDATE libro SET titulo = ?, id_autor=?, id_editorial=?, id_materia=?, cantidad=?, anio_edicion=?, num_pagina=?, descripcion=?, imagen=?, pdf_path=? WHERE id = ?";
+            $datos = array($titulo, $id_autor, $id_editorial, $id_materia, $cantidad, date('Y-m-d'), 0, $descripcion, $imgNombre, $pdfPath, $id);
+        }
+
+        try {
+            $data = $this->save($query, $datos);
+            if ($data == 1) {
+                $res = "modificado";
+            } else {
+                $res = "error";
+            }
+        } catch (Exception $e) {
+            $res = "error: " . $e->getMessage();
         }
         return $res;
     }
@@ -59,9 +119,13 @@ class LibrosModel extends Query
         $data = $this->save($query, $datos);
         return $data;
     }
-    public function buscarLibro($valor)
+    public function buscarLibro($valor, $nivel = null)
     {
-        $sql = "SELECT id, titulo AS text FROM libro WHERE titulo LIKE '%" . $valor . "%' AND estado = 1 LIMIT 10";
+        $sql = "SELECT id, titulo AS text FROM libro WHERE titulo LIKE '%" . $valor . "%' AND estado = 1";
+        if (!empty($nivel)) {
+            $sql .= " AND nivel = '" . $nivel . "'";
+        }
+        $sql .= " LIMIT 10";
         $data = $this->selectAll($sql);
         return $data;
     }

@@ -42,9 +42,9 @@
                     <div class="row">
                         <div class="col-md-12">
                             <div class="form-group">
-                                <label for="autor">Nombre</label>
+                                <label for="nombre">Nombre</label>
                                 <input type="hidden" id="id" name="id">
-                                <input id="autor" class="form-control" type="text" name="autor" required placeholder="Nombre de Autor" required>
+                                <input id="nombre" class="form-control" type="text" name="autor" required placeholder="Nombre de Autor" required>
                             </div>
                         </div>
                         <div class="col-md-12">

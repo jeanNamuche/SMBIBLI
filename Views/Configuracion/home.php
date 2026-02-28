@@ -86,7 +86,7 @@ if (isset($_SESSION['id_usuario'])) {
 <div class="row">
     <div class="col-md-12">
         <div class="tile">
-            <h3 class="tile-title" style="color: #0D072E;">TOP 5 LIBROS MÁS PRESTADOS</h3>
+            <h3 class="tile-title" style="color: #0D072E;">TOP LIBROS MÁS PRESTADOS</h3>
             <div class="embed-responsive embed-responsive-16by9">
                 <canvas class="embed-responsive-item" id="reportePrestamo"></canvas>
             </div>

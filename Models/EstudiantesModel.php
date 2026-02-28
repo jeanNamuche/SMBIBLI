@@ -12,14 +12,21 @@ class EstudiantesModel extends Query{
     }
     // New insert signature to match updated schema: codigo_estudiante, numero_documento, grado, seccion,
     // apellido_paterno, apellido_materno, nombres, id_usuario (nullable)
-    public function insertarEstudiante($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario = null)
+    public function insertarEstudiante($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario = null, $nivel = null)
     {
         // Check existence by codigo_estudiante or numero_documento
         $verificar = "SELECT * FROM estudiante WHERE codigo = '$codigo_estudiante' OR dni = '$numero_documento'";
         $existe = $this->select($verificar);
         if (empty($existe)) {
-            $query = "INSERT INTO estudiante(codigo, dni, grado, seccion, apellido_paterno, apellido_materno, nombre, id_usuario) VALUES (?,?,?,?,?,?,?,?)";
-            $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+            // include nivel column if table has it
+            $hasNivel = $this->select("SELECT COUNT(*) AS cnt_n FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='".db."' AND TABLE_NAME='estudiante' AND COLUMN_NAME='nivel'");
+            if ($hasNivel && isset($hasNivel['cnt_n']) && $hasNivel['cnt_n'] > 0) {
+                $query = "INSERT INTO estudiante(codigo, dni, grado, seccion, nivel, apellido_paterno, apellido_materno, nombre, id_usuario) VALUES (?,?,?,?,?,?,?,?,?)";
+                $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $nivel, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+            } else {
+                $query = "INSERT INTO estudiante(codigo, dni, grado, seccion, apellido_paterno, apellido_materno, nombre, id_usuario) VALUES (?,?,?,?,?,?,?,?)";
+                $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+            }
             // Use insert to get last insert id
             $insertId = $this->insert($query, $datos);
             if ($insertId > 0) {
@@ -38,10 +45,17 @@ class EstudiantesModel extends Query{
         $res = $this->select($sql);
         return $res;
     }
-    public function actualizarEstudiante($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id)
+    public function actualizarEstudiante($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id, $nivel = null)
     {
-        $query = "UPDATE estudiante SET codigo = ?, dni = ?, grado = ?, seccion = ?, apellido_paterno = ?, apellido_materno = ?, nombre = ?, id_usuario = ? WHERE id = ?";
-        $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id);
+        // update with nivel if column exists
+        $hasNivel = $this->select("SELECT COUNT(*) AS cnt_n FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='".db."' AND TABLE_NAME='estudiante' AND COLUMN_NAME='nivel'");
+        if ($hasNivel && isset($hasNivel['cnt_n']) && $hasNivel['cnt_n'] > 0) {
+            $query = "UPDATE estudiante SET codigo = ?, dni = ?, grado = ?, seccion = ?, nivel = ?, apellido_paterno = ?, apellido_materno = ?, nombre = ?, id_usuario = ? WHERE id = ?";
+            $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $nivel, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id);
+        } else {
+            $query = "UPDATE estudiante SET codigo = ?, dni = ?, grado = ?, seccion = ?, apellido_paterno = ?, apellido_materno = ?, nombre = ?, id_usuario = ? WHERE id = ?";
+            $datos = array($codigo_estudiante, $numero_documento, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $id);
+        }
         $data = $this->save($query, $datos);
         if ($data == 1) {
             $res = "modificado";
@@ -90,11 +104,12 @@ class EstudiantesModel extends Query{
         $dni = 'DNI' . $id_usuario . substr((string)time(), -4);
         $grado = null;
         $seccion = null;
+        $nivel = null;
         $apellido_paterno = null;
         $apellido_materno = null;
         $nombres = $nombre ?: 'Usuario ' . $id_usuario;
 
-        $nuevoId = $this->insertarEstudiante($codigo, $dni, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario);
+        $nuevoId = $this->insertarEstudiante($codigo, $dni, $grado, $seccion, $apellido_paterno, $apellido_materno, $nombres, $id_usuario, $nivel);
         if ($nuevoId && is_numeric($nuevoId)) {
             return (int)$nuevoId;
         }

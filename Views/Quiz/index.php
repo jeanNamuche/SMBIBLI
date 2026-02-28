@@ -3,7 +3,7 @@
 <div class="app-title">
     <div>
         <h1><i class="fa fa-puzzle-piece"></i> Administración: Quiz y Rompecabezas</h1>
-        <p class="lead">Cree y edite preguntas (5) y rompecabezas por libro.</p>
+        <p class="lead">Cree y edite preguntas y rompecabezas por libro.</p>
     </div>
 </div>
 
@@ -21,11 +21,12 @@
         </div>
 
         <div class="tile mt-3" id="preguntasPanel" style="display:none;">
-            <h3 class="tile-title">Preguntas (5)</h3>
+            <h3 class="tile-title">Preguntas</h3>
             <div class="tile-body" id="preguntasBody">
                 <!-- las 5 preguntas se generan por JS -->
             </div>
             <div class="tile-footer text-right">
+                <button id="btnAgregarPregunta" class="btn btn-info">Agregar pregunta</button>
                 <button id="btnGuardarTodasPreguntas" class="btn btn-success">Guardar todas las preguntas</button>
             </div>
         </div>
@@ -62,7 +63,7 @@
             <div class="tile-body">
                 <ul>
                     <li>Seleccione un libro y presione <strong>Cargar datos</strong>.</li>
-                    <li>Complete las 5 preguntas. Para cada pregunta agregue 4 opciones y marque la correcta.</li>
+                    <li>Complete las preguntas. Para cada pregunta agregue 4 opciones y marque la correcta.</li>
                     <li>Guarde las preguntas y luego el rompecabezas.</li>
                     <li>Las actividades estarán disponibles para estudiantes desde el catálogo si el libro tiene PDF.</li>
                 </ul>
@@ -133,10 +134,15 @@
         const cont = document.getElementById('preguntasBody');
         cont.innerHTML = '';
         for (let i = 1; i <= 5; i++) {
-            const idx = i;
-            const card = document.createElement('div');
-            card.className = 'mb-3';
-            card.innerHTML = `
+            agregarPreguntaUI(i);
+        }
+    }
+
+    function agregarPreguntaUI(idx) {
+        const cont = document.getElementById('preguntasBody');
+        const card = document.createElement('div');
+        card.className = 'mb-3';
+        card.innerHTML = `
                 <div class="card">
                     <div class="card-body">
                         <h5>Pregunta ${idx}</h5>
@@ -171,8 +177,7 @@
                     </div>
                 </div>
             `;
-            cont.appendChild(card);
-        }
+        cont.appendChild(card);
     }
 
     // Cargar preguntas y rompecabezas existentes
@@ -187,7 +192,11 @@
                 // rellenar
                 preguntas.forEach(p => {
                     const num = p.numero_pregunta;
-                    const textoEl = document.querySelector('.pregunta-texto[data-num="' + num + '"]');
+                    let textoEl = document.querySelector('.pregunta-texto[data-num="' + num + '"]');
+                    if (!textoEl) {
+                        agregarPreguntaUI(num);
+                        textoEl = document.querySelector('.pregunta-texto[data-num="' + num + '"]');
+                    }
                     if (textoEl) textoEl.value = p.texto_pregunta;
                     // limpiar opciones actuales en DB no necesarias aquí; mostraremos opciones existentes
                     if (p.opciones && p.opciones.length) {
@@ -247,8 +256,10 @@
         const id_libro = document.getElementById('selectLibro').value;
         if (!id_libro || id_libro == 0) { Swal.fire('Atención','Seleccione un libro','warning'); return; }
 
-        for (let i=1;i<=5;i++) {
-            const texto = document.querySelector('.pregunta-texto[data-num="' + i + '"]').value.trim();
+        const preguntasEls = document.querySelectorAll('.pregunta-texto');
+        for (let preguntaEl of preguntasEls) {
+            const i = preguntaEl.getAttribute('data-num');
+            const texto = preguntaEl.value.trim();
             if (!texto) continue; // omitir preguntas vacías
 
             const fd = new FormData();
@@ -297,7 +308,7 @@
         const div = document.createElement('div');
         div.className = 'border p-2 mb-1 d-flex justify-content-between align-items-center';
         div.dataset.pos = pos;
-        div.innerHTML = `<div>${pos}. ${texto}</div><div><button class="btn btn-sm btn-danger btn-eliminar-pieza">Eliminar</button></div>`;
+        div.innerHTML = `<div>${pos}. ${texto}</div><div><button class="btn btn-sm btn-warning btn-eliminar-pieza">Eliminar</button></div>`;
         cont.appendChild(div);
         document.getElementById('textoPieza').value = '';
         document.getElementById('posicionPieza').value = '';
@@ -345,6 +356,11 @@
             const id = document.getElementById('selectLibro').value;
             if (!id || id==0) { Swal.fire('Atención','Seleccione un libro','warning'); return; }
             cargarDatosLibro(id);
+        });
+
+        document.getElementById('btnAgregarPregunta').addEventListener('click', function() {
+            const preguntas = document.querySelectorAll('.pregunta-texto');
+            agregarPreguntaUI(preguntas.length + 1);
         });
 
         document.getElementById('btnGuardarTodasPreguntas').addEventListener('click', guardarTodasPreguntas);

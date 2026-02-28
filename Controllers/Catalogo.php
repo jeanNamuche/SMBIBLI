@@ -9,7 +9,17 @@ class Catalogo extends Controller
     }
     public function index()
     {
-        $libros = $this->model->getLibrosPublicos();
+        $nivel = null;
+        if (!empty($_SESSION['id_usuario'])) {
+            require_once 'Models/EstudiantesModel.php';
+            $estModel = new EstudiantesModel();
+            $row = $estModel->select("SELECT nivel FROM estudiante WHERE id_usuario = " . (int)$_SESSION['id_usuario']);
+            if (!empty($row) && isset($row['nivel'])) {
+                $nivel = $row['nivel'];
+            }
+        }
+
+        $libros = $this->model->getLibrosPublicos($nivel);
         // Obtener materias para los filtros de categoría
         $materias = array();
         if (method_exists($this->model, 'getMaterias')) {

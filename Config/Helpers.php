@@ -13,7 +13,7 @@ function strClean($cadena)
     $string = str_ireplace('INSERT INTO', '', $string);
     $string = str_ireplace('SELECT COUNT(*) FROM', '', $string);
     $string = str_ireplace('DROP TABLE', '', $string);
-    $string = str_ireplace("OR '1'='1", '', $string);
+    $string = str_ireplace("OR '1'='1'", '', $string);
     $string = str_ireplace('OR ´1´=´1', '', $string);
     $string = str_ireplace('IS NULL', '', $string);
     $string = str_ireplace('LIKE "', '', $string);
